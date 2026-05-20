@@ -43,9 +43,14 @@ else
 fi
 echo ""
 
-echo "6. create_appointment_hold (human text: Thursday, May 21st at 4:00 PM)"
-curl -sf -X POST -H "$AUTH" -H "Content-Type: application/json" \
-  -d "{\"slot_id\":\"Thursday, May 21st at 4:00 PM\",\"doctor_id\":\"$DOCTOR_ID\",\"service_id\":\"svc_urgent\",\"patient_name\":\"juan pablo hernandez\",\"patient_phone\":\"3415079340\",\"reason\":\"tooth pain\"}" \
+echo "6. create_appointment_hold (GET — ElevenLabs format)"
+curl -sf -G -H "$AUTH" \
+  --data-urlencode "slot_id=Monday, May 25, at 12:00 PM" \
+  --data-urlencode "doctor_id=$DOCTOR_ID" \
+  --data-urlencode "service_id=svc_urgent" \
+  --data-urlencode "patient_name=juan pablo hernandez" \
+  --data-urlencode "patient_phone=3415079340" \
+  --data-urlencode "reason=tooth pain" \
   "$BASE/api/tools/smilecare/create_appointment_hold" | python3 -m json.tool
 echo ""
 echo "Done."

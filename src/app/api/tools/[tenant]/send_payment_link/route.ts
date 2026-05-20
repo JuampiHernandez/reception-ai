@@ -4,18 +4,24 @@ import { eq } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { authenticateToolRequest, toolJson, toolError } from "@/lib/tools-auth";
 import { createAppointmentCheckout } from "@/lib/stripe";
+import { bodyFromRequest } from "@/lib/tool-request";
+import { toolLog } from "@/lib/tool-log";
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ tenant: string }> }
-) {
-  const { tenant: slug } = await params;
+async function handleSendPaymentLink(request: NextRequest, slug: string) {
   const tenant = await authenticateToolRequest(request, slug);
   if (!tenant) return toolError("Unauthorized", 401);
 
-  const body = await request.json();
+  const body = await bodyFromRequest(request);
   const appointmentId = body.appointment_id ?? body.appointmentId;
-  if (!appointmentId) return toolError("appointment_id required");
+  if (!appointmentId || typeof appointmentId !== "string") {
+    return toolError("appointment_id required");
+  }
+
+  toolLog("send_payment_link.request", {
+    tenant: slug,
+    method: request.method,
+    appointmentId,
+  });
 
   const appointment = await db.query.appointments.findFirst({
     where: eq(schema.appointments.id, appointmentId),
@@ -59,6 +65,8 @@ export async function POST(
     description: `Payment link sent for ${service.name}`,
   });
 
+  toolLog("send_payment_link.success", { tenant: slug, appointmentId });
+
   return toolJson({
     appointment_id: appointmentId,
     payment_url: url,
@@ -67,4 +75,20 @@ export async function POST(
     message:
       "Payment link generated. The patient must complete payment to confirm the appointment. Never ask for card details over the phone.",
   });
+}
+
+export async function GET(
+  request: NextRequest,
+  ctx: { params: Promise<{ tenant: string }> }
+) {
+  const { tenant: slug } = await ctx.params;
+  return handleSendPaymentLink(request, slug);
+}
+
+export async function POST(
+  request: NextRequest,
+  ctx: { params: Promise<{ tenant: string }> }
+) {
+  const { tenant: slug } = await ctx.params;
+  return handleSendPaymentLink(request, slug);
 }

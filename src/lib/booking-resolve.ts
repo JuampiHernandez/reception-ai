@@ -24,6 +24,16 @@ export function labelsMatch(a: string, b: string) {
   return na === nb || na.includes(nb) || nb.includes(na);
 }
 
+function isOrdinalSlotRef(slotRef: string) {
+  return /^(first(\s*(one|slot))?|1(st)?|one)$/i.test(slotRef.trim());
+}
+
+function dayHintInLabel(slotRef: string) {
+  const normalized = slotRef.toLowerCase();
+  const days = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
+  return days.find((day) => normalized.includes(day));
+}
+
 export async function releaseExpiredHolds(tenantId: string) {
   const now = new Date();
   const expired = await db.query.appointmentSlots.findMany({
@@ -56,6 +66,21 @@ export async function listOpenSlots(tenantId: string, doctorId?: string | null) 
   });
 }
 
+function pickOrdinalSlot(
+  openSlots: Array<{ id: string; startsAt: Date; doctorId: string }>,
+  slotRef: string
+) {
+  const sorted = [...openSlots].sort(
+    (a, b) => a.startsAt.getTime() - b.startsAt.getTime()
+  );
+  const dayHint = dayHintInLabel(slotRef);
+  const filtered = dayHint
+    ? sorted.filter((slot) => normalizeLabel(formatDateTime(slot.startsAt)).includes(dayHint))
+    : sorted;
+
+  return filtered[0] ?? sorted[0] ?? null;
+}
+
 export async function resolveOpenSlot(
   tenantId: string,
   slotRef: string,
@@ -72,6 +97,10 @@ export async function resolveOpenSlot(
   if (exact?.status === "open") return exact;
 
   const openSlots = await listOpenSlots(tenantId, doctorId);
+
+  if (isOrdinalSlotRef(slotRef)) {
+    return pickOrdinalSlot(openSlots, slotRef);
+  }
 
   return (
     openSlots.find((slot) => {

@@ -10,6 +10,7 @@ import {
   formatSlotOption,
   normalizeLabel,
 } from "@/lib/booking-resolve";
+import { bodyFromRequest } from "@/lib/tool-request";
 import { toolLog, withToolDebug } from "@/lib/tool-log";
 import { formatDateTime, formatCurrency } from "@/lib/utils";
 
@@ -24,15 +25,14 @@ function pickBodyFields(body: Record<string, unknown>) {
   };
 }
 
-export async function POST(
+async function handleCreateAppointmentHold(
   request: NextRequest,
-  { params }: { params: Promise<{ tenant: string }> }
+  slug: string
 ) {
-  const { tenant: slug } = await params;
   const tenant = await authenticateToolRequest(request, slug);
   if (!tenant) return toolError("Unauthorized", 401);
 
-  const body = (await request.json()) as Record<string, unknown>;
+  const body = await bodyFromRequest(request);
   const fields = pickBodyFields(body);
   const slotRef = String(fields.slot_id ?? "");
   let serviceRef = String(fields.service_id ?? "");
@@ -43,6 +43,7 @@ export async function POST(
 
   toolLog("create_appointment_hold.request", {
     tenant: slug,
+    method: request.method,
     received: fields,
     normalized_slot: normalizeLabel(slotRef),
   });
@@ -155,4 +156,20 @@ export async function POST(
     message:
       "Appointment held for 10 minutes. Call send_payment_link with appointment_id to send the Stripe deposit link.",
   });
+}
+
+export async function GET(
+  request: NextRequest,
+  ctx: { params: Promise<{ tenant: string }> }
+) {
+  const { tenant: slug } = await ctx.params;
+  return handleCreateAppointmentHold(request, slug);
+}
+
+export async function POST(
+  request: NextRequest,
+  ctx: { params: Promise<{ tenant: string }> }
+) {
+  const { tenant: slug } = await ctx.params;
+  return handleCreateAppointmentHold(request, slug);
 }

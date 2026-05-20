@@ -54,6 +54,13 @@ export function ElevenLabsWidget({ agentId }: { agentId: string }) {
         const widget = document.createElement("elevenlabs-convai");
         widget.setAttribute("agent-id", agentId);
         widget.setAttribute("variant", "full");
+        // Allow Stripe + app payment redirect links in chat (default blocks external URLs as [blocked])
+        widget.setAttribute(
+          "markdown-link-allowed-hosts",
+          "checkout.stripe.com stripe.com *.vercel.app localhost"
+        );
+        widget.setAttribute("markdown-link-include-www", "true");
+        widget.setAttribute("markdown-link-allow-http", "true");
         widget.style.display = "block";
         widget.style.width = "100%";
         widget.style.minHeight = "560px";

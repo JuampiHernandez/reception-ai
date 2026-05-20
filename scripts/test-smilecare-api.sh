@@ -44,8 +44,8 @@ fi
 echo ""
 
 echo "6. create_appointment_hold (GET — ElevenLabs format)"
-curl -sf -G -H "$AUTH" \
-  --data-urlencode "slot_id=Monday, May 25, at 12:00 PM" \
+curl -s -G -H "$AUTH" \
+  --data-urlencode "slot_id=Mon, May 25, 2:00 PM" \
   --data-urlencode "doctor_id=$DOCTOR_ID" \
   --data-urlencode "service_id=svc_urgent" \
   --data-urlencode "patient_name=juan pablo hernandez" \

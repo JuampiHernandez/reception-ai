@@ -67,13 +67,16 @@ async function handleSendPaymentLink(request: NextRequest, slug: string) {
 
   toolLog("send_payment_link.success", { tenant: slug, appointmentId });
 
+  const paymentPageUrl = `${baseUrl}/demo/${slug}/pay?appointment_id=${appointmentId}`;
+
   return toolJson({
     appointment_id: appointmentId,
     payment_url: url,
+    payment_page_url: paymentPageUrl,
     amount_cents: service.depositCents,
+    deposit_display: `$${(service.depositCents / 100).toFixed(2)}`,
     currency: service.currency,
-    message:
-      "Payment link generated. The patient must complete payment to confirm the appointment. Never ask for card details over the phone.",
+    message: `Tell the patient to open this link to pay the deposit: ${paymentPageUrl}. Do not use markdown link syntax — paste the full URL as plain text.`,
   });
 }
 

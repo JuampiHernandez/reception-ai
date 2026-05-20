@@ -9,7 +9,8 @@
     "lint": "eslint",
     "db:migrate": "tsx scripts/migrate.ts",
     "db:seed": "tsx scripts/seed-smilecare.ts",
-    "db:setup": "npm run db:migrate && npm run db:seed"
+    "db:setup": "npm run db:migrate && npm run db:seed",
+    "agent:configure": "tsx scripts/configure-smilecare-agent.ts"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

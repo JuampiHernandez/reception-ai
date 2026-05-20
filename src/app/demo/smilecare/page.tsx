@@ -35,8 +35,10 @@ export default function SmileCareDemoPage() {
           </p>
         </div>
 
-        <div className="mt-10 rounded-2xl border border-white/10 bg-white/5 p-6">
-          <ElevenLabsWidget agentId={agentId} />
+        <div className="mt-10 flex justify-center">
+          <div className="w-full max-w-2xl rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-6">
+            <ElevenLabsWidget agentId={agentId} />
+          </div>
         </div>
 
         <div className="mt-8 rounded-xl bg-white/5 p-6 text-sm text-slate-300">

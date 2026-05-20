@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getSessionUser } from "@/lib/auth";
+import { clinicPath } from "@/lib/routes";
 
 export default async function SettingsPage() {
   const session = await getSessionUser();
@@ -27,9 +28,12 @@ export default async function SettingsPage() {
           <p className="mt-1">{t.phone}</p>
         </div>
         <div>
-          <label className="text-sm font-medium">Embed demo</label>
+          <label className="text-sm font-medium">Customer site</label>
+          <p className="mt-1 font-mono text-sm">
+            {(process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000") + clinicPath(t.slug)}
+          </p>
           <pre className="mt-2 overflow-x-auto rounded bg-slate-100 p-3 text-xs">
-            {`<a href="${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/demo/${t.slug}">Talk to our AI receptionist</a>`}
+            {`<a href="${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}${clinicPath(t.slug)}">Talk to our AI receptionist</a>`}
           </pre>
         </div>
       </div>

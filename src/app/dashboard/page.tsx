@@ -7,6 +7,7 @@ import { RecentCallsTable } from "@/components/dashboard/RecentCallsTable";
 import { SoundWaveVisualizer } from "@/components/brand/SoundWaveVisualizer";
 import { formatCurrency } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { clinicPath } from "@/lib/routes";
 
 export default async function DashboardPage() {
   const session = await getSessionUser();
@@ -46,9 +47,9 @@ export default async function DashboardPage() {
           <p className="text-sm text-slate-400">Live Call Activity</p>
           <p className="mt-2 font-semibold">AI Agent is listening...</p>
           <SoundWaveVisualizer className="my-6 justify-center" />
-          <Link href="/demo/smilecare">
+          <Link href={clinicPath(session.tenant.slug)}>
             <Button variant="outline" size="sm" className="w-full">
-              View live demo
+              View customer site
             </Button>
           </Link>
         </div>

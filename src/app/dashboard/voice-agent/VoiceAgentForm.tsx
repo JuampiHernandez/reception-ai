@@ -1,9 +1,11 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { clinicPath } from "@/lib/routes";
 
 type Tenant = {
   id: string;
+  slug: string;
   name: string;
   greeting: string | null;
   voiceId: string | null;
@@ -27,8 +29,8 @@ export function VoiceAgentForm({
           <p className="text-slate-gray">Configure greeting, voice, and FAQs.</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="secondary" onClick={() => window.open("/demo/smilecare", "_blank")}>
-            Test my agent
+          <Button variant="secondary" onClick={() => window.open(clinicPath(tenant.slug), "_blank")}>
+            Test on customer site
           </Button>
           <Button>Save changes</Button>
         </div>

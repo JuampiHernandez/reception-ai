@@ -7,7 +7,6 @@ import {
   CreditCard,
   CheckCircle,
   ArrowRight,
-  Play,
   Heart,
   Scale,
   Smile,
@@ -17,6 +16,7 @@ import { LandingHeader } from "@/components/landing/Header";
 import { LiveCallCard } from "@/components/brand/LiveCallCard";
 import { PricingTable } from "@/components/landing/PricingTable";
 import { Button } from "@/components/ui/button";
+import { clinicPath } from "@/lib/routes";
 
 const features = [
   { icon: Phone, title: "Answers Calls 24/7", desc: "Never miss a lead again" },
@@ -35,6 +35,7 @@ const verticals = [
     title: "Dentists",
     desc: "Book appointments, answer insurance questions.",
     highlight: true,
+    exampleSlug: "smilecare",
   },
   { icon: Wrench, title: "Plumbers", desc: "Capture calls, check availability, collect deposits." },
 ];
@@ -57,12 +58,12 @@ export default function HomePage() {
               deposits through Stripe while you focus on your work.
             </p>
             <div className="mt-8 flex flex-wrap gap-4">
-              <Link href="/demo/smilecare">
-                <Button size="lg">Try the live demo →</Button>
-              </Link>
-              <Link href="/demo/smilecare">
+              <a href="#pricing">
+                <Button size="lg">View pricing →</Button>
+              </a>
+              <Link href={clinicPath("smilecare")}>
                 <Button variant="outline" size="lg">
-                  <Play className="h-4 w-4" /> Hear a sample call
+                  See a customer site
                 </Button>
               </Link>
             </div>
@@ -110,17 +111,20 @@ export default function HomePage() {
             Built for solo professionals
           </h2>
           <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {verticals.map(({ icon: Icon, title, desc, highlight }) => (
+            {verticals.map(({ icon: Icon, title, desc, highlight, exampleSlug }) => (
               <Link
                 key={title}
-                href={highlight ? "/demo/smilecare" : "#"}
+                href={exampleSlug ? clinicPath(exampleSlug) : "#"}
                 className={`rounded-xl border bg-white p-6 shadow-sm transition-shadow hover:shadow-md ${
                   highlight ? "border-reception-blue ring-2 ring-reception-blue/30" : "border-slate-200"
-                }`}
+                } ${!exampleSlug ? "pointer-events-none opacity-60" : ""}`}
               >
                 <Icon className="h-8 w-8 text-reception-blue" />
                 <h3 className="mt-4 font-semibold">{title}</h3>
                 <p className="mt-2 text-sm text-slate-gray">{desc}</p>
+                {exampleSlug && (
+                  <p className="mt-3 text-xs font-medium text-reception-blue">View live example →</p>
+                )}
               </Link>
             ))}
           </div>
@@ -176,9 +180,20 @@ export default function HomePage() {
         <h2 className="text-3xl font-bold text-white">
           Ready to turn every call into a client?
         </h2>
-        <Link href="/demo/smilecare" className="mt-8 inline-block">
-          <Button size="lg">Try the live demo →</Button>
-        </Link>
+        <p className="mx-auto mt-4 max-w-lg text-slate-300">
+          Set up your AI receptionist in minutes. Your customers get their own branded site
+          with voice booking, payments, and appointment history.
+        </p>
+        <div className="mt-8 flex flex-wrap justify-center gap-4">
+          <Link href="/login">
+            <Button size="lg">Get started →</Button>
+          </Link>
+          <a href="#pricing">
+            <Button variant="outline" size="lg">
+              Compare plans
+            </Button>
+          </a>
+        </div>
       </section>
 
       <footer className="border-t px-6 py-8 text-center text-sm text-slate-gray">

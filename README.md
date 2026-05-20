@@ -4,9 +4,13 @@
 
 Multi-tenant voice receptionist SaaS built for the **ElevenLabs × Stripe Hackathon** (#ElevenHacks). Answers calls 24/7, recommends specialists, books appointments, and collects deposits via Stripe Checkout — powered by ElevenLabs Conversational AI.
 
-## Demo: SmileCare Dental Center
+## Sites
 
-Live demo: [/demo/smilecare](http://localhost:3000/demo/smilecare)
+| Site | URL | Purpose |
+|------|-----|---------|
+| **Reception.ai** | [/](http://localhost:3000/) | Marketing — landing & pricing for the SaaS product |
+| **SmileCare Dental** | [/smilecare](http://localhost:3000/smilecare) | Customer site — voice booking, payments, appointment history |
+| **Dashboard** | [/dashboard](http://localhost:3000/dashboard) | Business admin for SmileCare (and future tenants) |
 
 **Dashboard login:** `smilecare@demo.reception.ai` / `demo1234`
 

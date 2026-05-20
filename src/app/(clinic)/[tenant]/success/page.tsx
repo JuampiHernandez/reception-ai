@@ -1,12 +1,15 @@
 "use client";
 
 import { useEffect, useState, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2 } from "lucide-react";
+import { clinicPath } from "@/lib/routes";
 
 function SuccessContent() {
+  const params = useParams<{ tenant: string }>();
+  const slug = params.tenant;
   const searchParams = useSearchParams();
   const appointmentId = searchParams.get("appointment_id");
   const mockPayment = searchParams.get("mock_payment");
@@ -26,24 +29,23 @@ function SuccessContent() {
   }, [appointmentId, mockPayment]);
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-deep-navy px-6 text-center text-white">
-      <CheckCircle2 className="h-16 w-16 text-soft-mint" />
-      <h1 className="mt-6 text-3xl font-bold">
+    <div className="flex flex-col items-center justify-center px-6 py-24 text-center">
+      <CheckCircle2 className="h-16 w-16 text-teal-600" />
+      <h1 className="mt-6 text-3xl font-bold text-slate-900">
         {confirmed ? "Appointment confirmed!" : "Processing payment..."}
       </h1>
-      <p className="mt-4 max-w-md text-slate-300">
-        Your deposit was received via Stripe. SmileCare Dental will see this in
-        their dashboard.
+      <p className="mt-4 max-w-md text-slate-600">
+        Your deposit was received. We&apos;ll see you at your scheduled time.
       </p>
       {appointmentId && (
-        <p className="mt-2 font-mono text-xs text-slate-500">{appointmentId}</p>
+        <p className="mt-2 font-mono text-xs text-slate-400">{appointmentId}</p>
       )}
-      <div className="mt-8 flex gap-4">
-        <Link href="/dashboard/bookings">
-          <Button>View bookings</Button>
+      <div className="mt-8 flex flex-wrap justify-center gap-4">
+        <Link href={clinicPath(slug, "appointments")}>
+          <Button>View my appointments</Button>
         </Link>
-        <Link href="/demo/smilecare">
-          <Button variant="outline">Back to demo</Button>
+        <Link href={clinicPath(slug)}>
+          <Button variant="outline">Back to home</Button>
         </Link>
       </div>
     </div>
@@ -52,7 +54,7 @@ function SuccessContent() {
 
 export default function SuccessPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-deep-navy" />}>
+    <Suspense fallback={<div className="py-24 text-center text-slate-500">Loading...</div>}>
       <SuccessContent />
     </Suspense>
   );

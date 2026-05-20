@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import { clinicPath } from "@/lib/routes";
 
 export function LandingHeader() {
   return (
@@ -17,8 +18,8 @@ export function LandingHeader() {
           <a href="#pricing" className="hover:text-white">
             Pricing
           </a>
-          <Link href="/demo/smilecare" className="hover:text-white">
-            Demo
+          <Link href={clinicPath("smilecare")} className="hover:text-white">
+            Customer example
           </Link>
           <a href="#integrations" className="hover:text-white">
             Integrations
@@ -30,9 +31,9 @@ export function LandingHeader() {
               Log in
             </Button>
           </Link>
-          <Link href="/demo/smilecare">
-            <Button size="sm">Try the live demo →</Button>
-          </Link>
+          <a href="#pricing">
+            <Button size="sm">Get started →</Button>
+          </a>
         </div>
       </div>
     </header>

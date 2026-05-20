@@ -6,6 +6,7 @@ import { authenticateToolRequest, toolJson, toolError } from "@/lib/tools-auth";
 import { createAppointmentCheckout } from "@/lib/stripe";
 import { bodyFromRequest } from "@/lib/tool-request";
 import { toolLog } from "@/lib/tool-log";
+import { clinicPath } from "@/lib/routes";
 
 async function handleSendPaymentLink(request: NextRequest, slug: string) {
   const tenant = await authenticateToolRequest(request, slug);
@@ -43,8 +44,8 @@ async function handleSendPaymentLink(request: NextRequest, slug: string) {
     amountCents: service.depositCents,
     currency: service.currency ?? "usd",
     patientName: appointment.patientName ?? undefined,
-    successUrl: `${baseUrl}/demo/${slug}/success?appointment_id=${appointmentId}`,
-    cancelUrl: `${baseUrl}/demo/${slug}?cancelled=1`,
+    successUrl: `${baseUrl}${clinicPath(slug, "success")}?appointment_id=${appointmentId}`,
+    cancelUrl: `${baseUrl}${clinicPath(slug)}?cancelled=1`,
   });
 
   await db
@@ -67,7 +68,7 @@ async function handleSendPaymentLink(request: NextRequest, slug: string) {
 
   toolLog("send_payment_link.success", { tenant: slug, appointmentId });
 
-  const paymentPageUrl = `${baseUrl}/demo/${slug}/pay?appointment_id=${appointmentId}`;
+  const paymentPageUrl = `${baseUrl}${clinicPath(slug, "pay")}?appointment_id=${appointmentId}`;
 
   return toolJson({
     appointment_id: appointmentId,

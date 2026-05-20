@@ -1,0 +1,61 @@
+{
+  "tenant": "smilecare",
+  "base_url": "http://localhost:3000/api/tools/smilecare",
+  "auth_header": "Authorization: Bearer smilecare_demo_key_change_me",
+  "tools": [
+    {
+      "name": "list_doctors",
+      "method": "GET",
+      "url": "/list_doctors",
+      "description": "List all active doctors and their specialties"
+    },
+    {
+      "name": "recommend_doctor",
+      "method": "POST",
+      "url": "/recommend_doctor",
+      "description": "Recommend the best doctor based on symptoms and urgency",
+      "body": {
+        "symptoms": "string",
+        "reason": "string",
+        "urgency": "low | medium | high",
+        "patient_type": "adult | child | new | existing"
+      }
+    },
+    {
+      "name": "get_availability",
+      "method": "GET",
+      "url": "/get_availability",
+      "query": { "doctor_id": "required" }
+    },
+    {
+      "name": "get_appointment_quote",
+      "method": "GET",
+      "url": "/get_appointment_quote",
+      "query": { "service_id": "required" }
+    },
+    {
+      "name": "create_appointment_hold",
+      "method": "POST",
+      "url": "/create_appointment_hold",
+      "body": {
+        "slot_id": "string",
+        "service_id": "string",
+        "patient_name": "string",
+        "patient_phone": "string",
+        "reason": "string"
+      }
+    },
+    {
+      "name": "send_payment_link",
+      "method": "POST",
+      "url": "/send_payment_link",
+      "body": { "appointment_id": "string" }
+    },
+    {
+      "name": "confirm_appointment_status",
+      "method": "GET",
+      "url": "/confirm_appointment_status",
+      "query": { "appointment_id": "required" }
+    }
+  ]
+}

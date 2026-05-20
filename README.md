@@ -1,36 +1,81 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Reception.ai
 
-## Getting Started
+**The AI receptionist that never misses a call.**
 
-First, run the development server:
+Multi-tenant voice receptionist SaaS built for the **ElevenLabs × Stripe Hackathon** (#ElevenHacks). Answers calls 24/7, recommends specialists, books appointments, and collects deposits via Stripe Checkout — powered by ElevenLabs Conversational AI.
+
+## Demo: SmileCare Dental Center
+
+Live demo: [/demo/smilecare](http://localhost:3000/demo/smilecare)
+
+**Dashboard login:** `smilecare@demo.reception.ai` / `demo1234`
+
+### Demo flow (English)
+
+1. "Hi, I'd like an appointment. I have tooth pain on the right side."
+2. Agent recommends **Dr. Ana Martínez** (endodontics)
+3. Offers availability → books slot → sends **Stripe payment link**
+4. Payment confirms → appointment appears in dashboard
+
+## Quick start
 
 ```bash
+npm install
+cp .env.example .env.local
+# Fill DATABASE_URL from Supabase — see docs/ENV_SETUP.md
+npm run db:setup
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000 (if port busy, use the URL shown in the terminal).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+**Stop duplicate dev servers:** `kill 87609` or `lsof -ti:3000 | xargs kill`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Environment variables
 
-## Learn More
+**Full guide (each variable + where to get it):** [docs/ENV_SETUP.md](docs/ENV_SETUP.md)
 
-To learn more about Next.js, take a look at the following resources:
+Minimum in `.env.local`:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Variable | Required? |
+|----------|-----------|
+| `DATABASE_URL` | Yes — Supabase Postgres URI |
+| `NEXT_PUBLIC_APP_URL` | Yes |
+| `SMILECARE_TENANT_API_KEY` | Yes — you choose the value |
+| `NEXT_PUBLIC_ELEVENLABS_AGENT_ID` | Yes for voice demo |
+| Stripe keys | Optional (mock payments work) |
+| Twilio | Optional |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## ElevenLabs agent
 
-## Deploy on Vercel
+See [elevenlabs/AGENT_SETUP.md](elevenlabs/AGENT_SETUP.md) for system prompt and server tool URLs.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Tool API base: `http://localhost:3000/api/tools/smilecare/`
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Architecture
+
+- **Next.js 16** — landing, dashboard, API routes
+- **Supabase** (Postgres + Drizzle ORM) — multi-tenant data
+- **ElevenLabs** — conversational AI + web widget
+- **Stripe Checkout** — appointment deposits + SaaS subscriptions
+- **Twilio** (optional) — phone calls
+
+## Hackathon submission
+
+### Video checklist
+
+See [docs/VIDEO_SUBMISSION.md](docs/VIDEO_SUBMISSION.md)
+
+### Social post
+
+Tag **@stripe** and **@elevenlabsio** with **#ElevenHacks**
+
+## Stripe test card
+
+`4242 4242 4242 4242` — any future expiry, any CVC
+
+Without Stripe keys, mock payment flow auto-confirms on success URL.
+
+## License
+
+MIT

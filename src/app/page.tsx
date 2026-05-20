@@ -1,65 +1,189 @@
-import Image from "next/image";
+import Link from "next/link";
+import {
+  Phone,
+  Calendar,
+  HelpCircle,
+  Send,
+  CreditCard,
+  CheckCircle,
+  ArrowRight,
+  Play,
+  Heart,
+  Scale,
+  Smile,
+  Wrench,
+} from "lucide-react";
+import { LandingHeader } from "@/components/landing/Header";
+import { LiveCallCard } from "@/components/brand/LiveCallCard";
+import { PricingTable } from "@/components/landing/PricingTable";
+import { Button } from "@/components/ui/button";
 
-export default function Home() {
+const features = [
+  { icon: Phone, title: "Answers Calls 24/7", desc: "Never miss a lead again" },
+  { icon: Calendar, title: "Books Appointments", desc: "Syncs with your calendar" },
+  { icon: HelpCircle, title: "Answers FAQs", desc: "Trained on your business" },
+  { icon: Send, title: "Sends Payment Links", desc: "Secure Stripe checkout" },
+  { icon: CreditCard, title: "Collects Deposits", desc: "Reduce no-shows" },
+  { icon: CheckCircle, title: "Sends Confirmations", desc: "SMS and email alerts" },
+];
+
+const verticals = [
+  { icon: Heart, title: "Therapists", desc: "Book new patients and collect intake deposits." },
+  { icon: Scale, title: "Lawyers", desc: "Qualify leads, schedule consults, collect fees." },
+  {
+    icon: Smile,
+    title: "Dentists",
+    desc: "Book appointments, answer insurance questions.",
+    highlight: true,
+  },
+  { icon: Wrench, title: "Plumbers", desc: "Capture calls, check availability, collect deposits." },
+];
+
+export default function HomePage() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <div className="min-h-screen">
+      <LandingHeader />
+
+      <section className="bg-deep-navy px-6 py-20">
+        <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-2">
+          <div>
+            <h1 className="text-4xl font-bold leading-tight text-white md:text-5xl lg:text-[56px]">
+              Turn missed calls into{" "}
+              <span className="text-soft-mint">booked appointments.</span>
+            </h1>
+            <p className="mt-6 text-lg text-slate-300">
+              Reception.ai is an AI phone receptionist for solo professionals. It
+              answers calls 24/7, books appointments, answers FAQs, and collects
+              deposits through Stripe while you focus on your work.
+            </p>
+            <div className="mt-8 flex flex-wrap gap-4">
+              <Link href="/demo/smilecare">
+                <Button size="lg">Try the live demo →</Button>
+              </Link>
+              <Link href="/demo/smilecare">
+                <Button variant="outline" size="lg">
+                  <Play className="h-4 w-4" /> Hear a sample call
+                </Button>
+              </Link>
+            </div>
+            <p className="mt-8 text-xs text-slate-500">
+              Built with{" "}
+              <span className="text-slate-400">ElevenLabs · Twilio · Stripe</span>
+            </p>
+          </div>
+          <LiveCallCard />
+        </div>
+      </section>
+
+      <section className="border-b bg-white px-6 py-8" id="integrations">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-8 text-sm text-slate-gray">
+          <span>Trusted by teams using</span>
+          <span className="font-semibold text-deep-navy">ElevenLabs</span>
+          <span className="font-semibold text-deep-navy">Twilio</span>
+          <span className="font-semibold text-deep-navy">Stripe</span>
+        </div>
+      </section>
+
+      <section className="px-6 py-20" id="features">
+        <div className="mx-auto max-w-6xl">
+          <h2 className="text-center text-3xl font-semibold text-deep-navy">
+            Everything your front desk does — automated
+          </h2>
+          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {features.map(({ icon: Icon, title, desc }) => (
+              <div
+                key={title}
+                className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
+              >
+                <Icon className="h-8 w-8 text-reception-blue" />
+                <h3 className="mt-4 font-semibold">{title}</h3>
+                <p className="mt-2 text-sm text-slate-gray">{desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-slate-50 px-6 py-20">
+        <div className="mx-auto max-w-6xl">
+          <h2 className="text-center text-3xl font-semibold">
+            Built for solo professionals
+          </h2>
+          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {verticals.map(({ icon: Icon, title, desc, highlight }) => (
+              <Link
+                key={title}
+                href={highlight ? "/demo/smilecare" : "#"}
+                className={`rounded-xl border bg-white p-6 shadow-sm transition-shadow hover:shadow-md ${
+                  highlight ? "border-reception-blue ring-2 ring-reception-blue/30" : "border-slate-200"
+                }`}
+              >
+                <Icon className="h-8 w-8 text-reception-blue" />
+                <h3 className="mt-4 font-semibold">{title}</h3>
+                <p className="mt-2 text-sm text-slate-gray">{desc}</p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="px-6 py-20">
+        <div className="mx-auto max-w-4xl text-center">
+          <h2 className="text-3xl font-semibold">How it works</h2>
+          <div className="mt-12 flex flex-wrap items-center justify-center gap-4 text-sm font-medium">
+            {["Call comes in", "AI handles it", "Deposit collected", "You're updated"].map(
+              (step, i) => (
+                <span key={step} className="flex items-center gap-4">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-reception-blue text-white">
+                    {i + 1}
+                  </span>
+                  {step}
+                  {i < 3 && <ArrowRight className="h-4 w-4 text-slate-gray" />}
+                </span>
+              )
+            )}
+          </div>
+          <div className="mt-16 grid gap-8 sm:grid-cols-3">
+            <div>
+              <p className="text-3xl font-bold text-reception-blue">12,843</p>
+              <p className="text-slate-gray">Calls answered</p>
+            </div>
+            <div>
+              <p className="text-3xl font-bold text-reception-blue">4,326</p>
+              <p className="text-slate-gray">Appointments booked</p>
+            </div>
+            <div>
+              <p className="text-3xl font-bold text-reception-blue">$864,200</p>
+              <p className="text-slate-gray">Deposits collected</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="px-6 py-20" id="pricing">
+        <div className="mx-auto max-w-6xl">
+          <h2 className="text-center text-3xl font-semibold">Simple pricing</h2>
+          <p className="mt-2 text-center text-slate-gray">
+            Start free. Upgrade when you&apos;re ready.
           </p>
+          <div className="mt-12">
+            <PricingTable />
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+      </section>
+
+      <section className="bg-deep-navy px-6 py-20 text-center">
+        <h2 className="text-3xl font-bold text-white">
+          Ready to turn every call into a client?
+        </h2>
+        <Link href="/demo/smilecare" className="mt-8 inline-block">
+          <Button size="lg">Try the live demo →</Button>
+        </Link>
+      </section>
+
+      <footer className="border-t px-6 py-8 text-center text-sm text-slate-gray">
+        Reception.ai — ElevenLabs × Stripe Hackathon · #ElevenHacks
+      </footer>
     </div>
   );
 }

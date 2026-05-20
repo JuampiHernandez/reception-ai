@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Reception.ai — AI Receptionist for Your Business",
   description:
-    "Sell smarter with AI phone receptionists. Books appointments, answers FAQs, and collects deposits — built for solo professionals and small teams.",
+    "Turn every call into a booked client. AI phone receptionist that answers calls 24/7, books appointments, and collects deposits through Stripe.",
 };
 
 export default function MarketingLayout({
@@ -11,5 +11,9 @@ export default function MarketingLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return children;
+  return (
+    <div className="marketing-shell">
+      {children}
+    </div>
+  );
 }

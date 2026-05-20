@@ -1,30 +1,87 @@
 @import "tailwindcss";
 
+@theme inline {
+  --color-deep-navy: #050510;
+  --color-reception-blue: #3b82f6;
+  --color-reception-purple: #8b5cf6;
+  --color-soft-mint: #34d399;
+  --color-slate-gray: #94a3b8;
+  --color-cloud-white: #f4f6f8;
+  --color-background: #f4f6f8;
+  --color-foreground: #0f172a;
+  --font-sans: var(--font-inter);
+}
+
 :root {
-  --deep-navy: #0b1020;
+  --deep-navy: #050510;
   --reception-blue: #3b82f6;
+  --reception-purple: #8b5cf6;
   --clinic-teal: #0d9488;
   --clinic-teal-light: #f0fdfa;
   --soft-mint: #34d399;
-  --slate-gray: #64748b;
+  --slate-gray: #94a3b8;
   --cloud-white: #f4f6f8;
   --background: #f4f6f8;
   --foreground: #0f172a;
-}
-
-@theme inline {
-  --color-deep-navy: var(--deep-navy);
-  --color-reception-blue: var(--reception-blue);
-  --color-soft-mint: var(--soft-mint);
-  --color-slate-gray: var(--slate-gray);
-  --color-cloud-white: var(--cloud-white);
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-inter);
+  --gradient-from: #8b5cf6;
+  --gradient-to: #3b82f6;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-inter), system-ui, sans-serif;
+}
+
+@layer components {
+  .marketing-shell {
+    min-height: 100vh;
+    color: #ffffff;
+    background-color: #050510;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(139, 92, 246, 0.15), transparent),
+      radial-gradient(ellipse 60% 40% at 80% 50%, rgba(59, 130, 246, 0.08), transparent),
+      radial-gradient(circle at 20% 80%, rgba(139, 92, 246, 0.06), transparent);
+  }
+
+  .gradient-text {
+    background: linear-gradient(to right, #8b5cf6, #3b82f6);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .gradient-bg {
+    background: linear-gradient(to right, #8b5cf6, #3b82f6);
+  }
+
+  .gradient-border {
+    position: relative;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 1rem;
+  }
+
+  .gradient-border::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, #8b5cf6, #3b82f6);
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  .marketing-glow {
+    box-shadow:
+      0 0 60px rgba(139, 92, 246, 0.15),
+      0 0 120px rgba(59, 130, 246, 0.08);
+  }
 }

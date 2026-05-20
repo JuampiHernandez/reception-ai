@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { authenticateToolRequest, toolJson, toolError } from "@/lib/tools-auth";
 import { getTenantDoctors, getTenantServices } from "@/lib/tenant";
 import { recommendDoctor } from "@/lib/recommend";
+import { toolLog } from "@/lib/tool-log";
 
 export async function POST(
   request: NextRequest,
@@ -33,6 +34,12 @@ export async function POST(
   if (!recommendation) return toolError("No doctors available", 404);
 
   const service = services.find((s) => s.id === recommendation.suggestedServiceId);
+
+  toolLog("recommend_doctor.success", {
+    tenant: slug,
+    doctor_id: recommendation.doctorId,
+    service_id: recommendation.suggestedServiceId,
+  });
 
   return toolJson({
     ...recommendation,

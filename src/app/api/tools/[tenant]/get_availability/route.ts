@@ -2,6 +2,8 @@ import { NextRequest } from "next/server";
 import { db, schema } from "@/lib/db";
 import { eq, and, gte } from "drizzle-orm";
 import { authenticateToolRequest, toolJson, toolError } from "@/lib/tools-auth";
+import { releaseExpiredHolds } from "@/lib/booking-resolve";
+import { toolLog } from "@/lib/tool-log";
 import { formatDateTime } from "@/lib/utils";
 
 export async function GET(
@@ -14,6 +16,8 @@ export async function GET(
 
   const doctorId = request.nextUrl.searchParams.get("doctor_id");
   if (!doctorId) return toolError("doctor_id required");
+
+  await releaseExpiredHolds(tenant.id);
 
   const now = new Date();
   const slots = await db.query.appointmentSlots.findMany({
@@ -31,6 +35,12 @@ export async function GET(
 
   const doctor = await db.query.doctors.findFirst({
     where: eq(schema.doctors.id, doctorId),
+  });
+
+  toolLog("get_availability.success", {
+    tenant: slug,
+    doctorId,
+    slot_count: sorted.length,
   });
 
   return toolJson({

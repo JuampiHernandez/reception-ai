@@ -3,8 +3,26 @@ import { db, schema } from "@/lib/db";
 import { eq } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { authenticateToolRequest, toolJson, toolError } from "@/lib/tools-auth";
-import { resolveOpenSlot, resolveService } from "@/lib/booking-resolve";
+import {
+  resolveOpenSlot,
+  resolveService,
+  listOpenSlots,
+  formatSlotOption,
+  normalizeLabel,
+} from "@/lib/booking-resolve";
+import { toolLog, withToolDebug } from "@/lib/tool-log";
 import { formatDateTime, formatCurrency } from "@/lib/utils";
+
+function pickBodyFields(body: Record<string, unknown>) {
+  return {
+    slot_id: body.slot_id ?? body.slotId,
+    service_id: body.service_id ?? body.serviceId,
+    doctor_id: body.doctor_id ?? body.doctorId,
+    patient_name: body.patient_name ?? body.patientName,
+    patient_phone: body.patient_phone ?? body.patientPhone,
+    reason: body.reason ?? body.symptoms,
+  };
+}
 
 export async function POST(
   request: NextRequest,
@@ -14,32 +32,77 @@ export async function POST(
   const tenant = await authenticateToolRequest(request, slug);
   if (!tenant) return toolError("Unauthorized", 401);
 
-  const body = await request.json();
-  const slotRef = body.slot_id ?? body.slotId;
-  const serviceRef = body.service_id ?? body.serviceId;
-  const doctorId = body.doctor_id ?? body.doctorId ?? null;
-  const patientName = body.patient_name ?? body.patientName;
-  const patientPhone = body.patient_phone ?? body.patientPhone;
-  const reason = body.reason ?? body.symptoms;
+  const body = (await request.json()) as Record<string, unknown>;
+  const fields = pickBodyFields(body);
+  const slotRef = String(fields.slot_id ?? "");
+  let serviceRef = String(fields.service_id ?? "");
+  const doctorId = fields.doctor_id ? String(fields.doctor_id) : null;
+  const patientName = fields.patient_name ? String(fields.patient_name) : undefined;
+  const patientPhone = fields.patient_phone ? String(fields.patient_phone) : undefined;
+  const reason = fields.reason ? String(fields.reason) : undefined;
 
-  if (!slotRef || !serviceRef) {
-    return toolError(
-      "slot_id and service_id required. Use exact slot_id from get_availability (e.g. slot_doc_ana_1779717600000), not the display time."
+  toolLog("create_appointment_hold.request", {
+    tenant: slug,
+    received: fields,
+    normalized_slot: normalizeLabel(slotRef),
+  });
+
+  if (!slotRef) {
+    return toolJson(
+      withToolDebug(
+        {
+          error: "slot_id required. Call get_availability and pass slot_id or the display time.",
+        },
+        { received: fields }
+      ),
+      400
     );
+  }
+
+  if (!serviceRef) {
+    serviceRef = "svc_urgent";
+    toolLog("create_appointment_hold.default_service", { serviceRef });
   }
 
   const slot = await resolveOpenSlot(tenant.id, slotRef, doctorId);
   if (!slot) {
-    return toolError(
-      `Slot not available for "${slotRef}". Call get_availability again and pass the exact slot_id field.`,
+    const available = (await listOpenSlots(tenant.id, doctorId))
+      .slice(0, 8)
+      .map(formatSlotOption);
+
+    toolLog("create_appointment_hold.slot_not_found", {
+      tenant: slug,
+      slotRef,
+      doctorId,
+      available_count: available.length,
+    });
+
+    return toolJson(
+      withToolDebug(
+        {
+          error: `Could not hold slot "${slotRef}". Pick one of the available_slots below and retry create_appointment_hold with that slot_id.`,
+          available_slots: available,
+        },
+        { received: fields, normalized_slot: normalizeLabel(slotRef) }
+      ),
       409
     );
   }
 
   const service = await resolveService(tenant.id, serviceRef);
   if (!service) {
-    return toolError(
-      `Service not found for "${serviceRef}". Use service_id from recommend_doctor (e.g. svc_urgent).`,
+    toolLog("create_appointment_hold.service_not_found", {
+      tenant: slug,
+      serviceRef,
+    });
+
+    return toolJson(
+      withToolDebug(
+        {
+          error: `Service not found for "${serviceRef}". Use service_id from recommend_doctor (e.g. svc_urgent).`,
+        },
+        { received: fields }
+      ),
       404
     );
   }
@@ -67,6 +130,13 @@ export async function POST(
     reason,
     status: "held",
     amountCents: service.depositCents,
+  });
+
+  toolLog("create_appointment_hold.success", {
+    tenant: slug,
+    appointmentId,
+    slot_id: slot.id,
+    service_id: service.id,
   });
 
   return toolJson({

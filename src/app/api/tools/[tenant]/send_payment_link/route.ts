@@ -7,6 +7,8 @@ import { createAppointmentCheckout } from "@/lib/stripe";
 import { bodyFromRequest } from "@/lib/tool-request";
 import { toolLog } from "@/lib/tool-log";
 import { clinicPath } from "@/lib/routes";
+import { sendPaymentLinkEmail } from "@/lib/email";
+import { formatDateTime } from "@/lib/utils";
 
 async function handleSendPaymentLink(request: NextRequest, slug: string) {
   const tenant = await authenticateToolRequest(request, slug);
@@ -35,6 +37,10 @@ async function handleSendPaymentLink(request: NextRequest, slug: string) {
     where: eq(schema.services.id, appointment.serviceId),
   });
   if (!service) return toolError("Service not found", 404);
+
+  const slot = await db.query.appointmentSlots.findFirst({
+    where: eq(schema.appointmentSlots.id, appointment.slotId),
+  });
 
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
   const { url, sessionId } = await createAppointmentCheckout({
@@ -69,15 +75,33 @@ async function handleSendPaymentLink(request: NextRequest, slug: string) {
   toolLog("send_payment_link.success", { tenant: slug, appointmentId });
 
   const paymentPageUrl = `${baseUrl}${clinicPath(slug, "pay")}?appointment_id=${appointmentId}`;
+  const depositDisplay = `$${(service.depositCents / 100).toFixed(2)}`;
+
+  let emailSent = false;
+  if (appointment.patientEmail) {
+    const emailResult = await sendPaymentLinkEmail({
+      to: appointment.patientEmail,
+      patientName: appointment.patientName ?? undefined,
+      clinicName: tenant.name,
+      paymentPageUrl,
+      depositDisplay,
+      serviceName: service.name,
+      slotDisplay: slot ? formatDateTime(slot.startsAt) : undefined,
+    });
+    emailSent = emailResult.sent;
+  }
 
   return toolJson({
     appointment_id: appointmentId,
     payment_url: url,
     payment_page_url: paymentPageUrl,
     amount_cents: service.depositCents,
-    deposit_display: `$${(service.depositCents / 100).toFixed(2)}`,
+    deposit_display: depositDisplay,
     currency: service.currency,
-    message: `Payment link is on the patient's screen in the live transcript (do not read the URL aloud). If they gave an email, they can sign in at ${baseUrl}${clinicPath(slug, "login")} and pay from My appointments. Tap link: ${paymentPageUrl}`,
+    email_sent: emailSent,
+    message: emailSent
+      ? `Payment link sent by email to ${appointment.patientEmail}. A pay button also appears on the patient's screen. Tell them briefly the link is in their inbox — do NOT read any URL aloud. End the conversation; do not wait for them to speak again.`
+      : `Payment link is on the patient's screen (pay button in transcript). Do NOT read any URL aloud. If they shared an email, mention they can also sign in at ${baseUrl}${clinicPath(slug, "login")}. End the conversation; do not wait for them to speak again.`,
   });
 }
 

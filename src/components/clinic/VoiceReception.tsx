@@ -1,154 +1,187 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type Dispatch,
+  type SetStateAction,
+} from "react";
 import {
   ConversationProvider,
   useConversationControls,
   useConversationStatus,
   useConversationMode,
 } from "@elevenlabs/react";
-import { Phone, PhoneOff, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { ConversationTranscript } from "./ConversationTranscript";
+import { VoiceActivityCard } from "./VoiceActivityCard";
+import { TranscriptComposer } from "./TranscriptComposer";
+import { ClinicSidebar } from "./ClinicSidebar";
 import type { PaymentLinkCard, TranscriptMessage } from "./voice-reception-types";
+
+type PaymentLinkData = {
+  payment_page_url?: string;
+  payment_url?: string;
+  deposit_display?: string;
+  email_sent?: boolean;
+};
 
 function extractUrls(text: string): string[] {
   const matches = text.match(/https?:\/\/[^\s]+/g);
   return matches ?? [];
 }
 
-function CallControls({ agentId }: { agentId: string }) {
-  const { startSession, endSession } = useConversationControls();
+function messageRole(event: { source?: string; role?: string }): "user" | "agent" {
+  if (event.role === "user" || event.source === "user") return "user";
+  return "agent";
+}
+
+function VoiceReceptionSession({
+  agentId,
+  slug,
+  messages,
+  paymentLinks,
+  paymentLinkSent,
+  setMessages,
+  setPaymentLinks,
+  setPaymentLinkSent,
+  paymentLinkHandlerRef,
+  pendingQuickActionRef,
+}: {
+  agentId: string;
+  slug: string;
+  messages: TranscriptMessage[];
+  paymentLinks: PaymentLinkCard[];
+  paymentLinkSent: boolean;
+  setMessages: Dispatch<SetStateAction<TranscriptMessage[]>>;
+  setPaymentLinks: Dispatch<SetStateAction<PaymentLinkCard[]>>;
+  setPaymentLinkSent: Dispatch<SetStateAction<boolean>>;
+  paymentLinkHandlerRef: React.MutableRefObject<((data: PaymentLinkData) => void) | null>;
+  pendingQuickActionRef: React.MutableRefObject<string | null>;
+}) {
   const { status } = useConversationStatus();
   const { isSpeaking } = useConversationMode();
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { endSession, startSession, sendUserMessage } = useConversationControls();
+  const endTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const isConnected = status === "connected";
-  const isConnecting = status === "connecting";
+  const handlePaymentLink = useCallback(
+    (data: PaymentLinkData) => {
+      const url = data.payment_page_url ?? data.payment_url;
+      if (!url) return;
 
-  async function handleStart() {
-    setError(null);
-    setBusy(true);
+      setPaymentLinkSent(true);
+      setPaymentLinks((prev) => {
+        if (prev.some((p) => p.url === url)) return prev;
+        return [
+          ...prev,
+          {
+            url,
+            label: `Pay deposit${data.deposit_display ? ` (${data.deposit_display})` : ""}`,
+            amountDisplay: data.deposit_display,
+          },
+        ];
+      });
+
+      const emailNote = data.email_sent
+        ? "We emailed you the deposit link."
+        : "Your deposit link is ready below.";
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `system-pay-${Date.now()}`,
+          role: "agent",
+          text: `${emailNote} Tap Pay securely when you're ready — no need to stay on the call.`,
+        },
+      ]);
+
+      if (endTimerRef.current) clearTimeout(endTimerRef.current);
+      endTimerRef.current = setTimeout(() => {
+        void endSession();
+      }, 3000);
+    },
+    [endSession, setMessages, setPaymentLinks, setPaymentLinkSent]
+  );
+
+  useEffect(() => {
+    paymentLinkHandlerRef.current = handlePaymentLink;
+    return () => {
+      paymentLinkHandlerRef.current = null;
+    };
+  }, [handlePaymentLink, paymentLinkHandlerRef]);
+
+  useEffect(() => {
+    if (status !== "connected" || !pendingQuickActionRef.current) return;
+    const msg = pendingQuickActionRef.current;
+    pendingQuickActionRef.current = null;
+    sendUserMessage(msg);
+  }, [status, sendUserMessage, pendingQuickActionRef]);
+
+  async function handleQuickAction(message: string) {
+    if (paymentLinkSent) return;
+    if (status === "connected") {
+      sendUserMessage(message);
+      return;
+    }
+    pendingQuickActionRef.current = message;
     try {
       await navigator.mediaDevices.getUserMedia({ audio: true });
       await startSession({ agentId });
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : "Could not start call";
-      setError(
-        msg.includes("Permission") || msg.includes("NotAllowed")
-          ? "Microphone access is required for voice booking."
-          : msg
-      );
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function handleEnd() {
-    setBusy(true);
-    try {
-      await endSession();
-    } finally {
-      setBusy(false);
+    } catch {
+      pendingQuickActionRef.current = null;
     }
   }
 
   return (
-    <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-slate-100 pt-4">
-      {!isConnected && !isConnecting ? (
-        <Button
-          type="button"
-          onClick={handleStart}
-          disabled={busy}
-          className="gap-2 bg-slate-900 hover:bg-slate-800"
-        >
-          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Phone className="h-4 w-4" />}
-          Start a call
-        </Button>
-      ) : (
-        <>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleEnd}
-            disabled={busy || isConnecting}
-            className="gap-2"
-          >
-            <PhoneOff className="h-4 w-4" />
-            End call
-          </Button>
-          <span className="text-sm text-slate-600">
-            {isConnecting && "Connecting…"}
-            {isConnected && (isSpeaking ? "Receptionist is speaking…" : "Listening…")}
-          </span>
-        </>
-      )}
-      {error && <p className="w-full text-sm text-red-600">{error}</p>}
-    </div>
-  );
-}
-
-function VoiceReceptionInner({
-  agentId,
-  messages,
-  paymentLinks,
-  status,
-}: {
-  agentId: string;
-  messages: TranscriptMessage[];
-  paymentLinks: PaymentLinkCard[];
-  status: string;
-}) {
-  return (
-    <>
+    <div className="grid gap-8 lg:grid-cols-[1fr_300px]">
+      <div className="space-y-4">
+        <VoiceActivityCard
+          agentId={agentId}
+          isSpeaking={isSpeaking}
+          paymentLinkSent={paymentLinkSent}
+        />
       <ConversationTranscript
         messages={messages}
         paymentLinks={paymentLinks}
         status={status}
-      />
-      <CallControls agentId={agentId} />
-    </>
+        composer={
+            !paymentLinkSent ? (
+              <TranscriptComposer disabled={paymentLinkSent} />
+            ) : undefined
+          }
+        />
+      </div>
+      <ClinicSidebar slug={slug} onQuickAction={handleQuickAction} />
+    </div>
   );
 }
 
-function ConnectedVoiceReception({
-  agentId,
-  messages,
-  paymentLinks,
-}: {
-  agentId: string;
-  messages: TranscriptMessage[];
-  paymentLinks: PaymentLinkCard[];
-}) {
-  const { status } = useConversationStatus();
-
-  return (
-    <VoiceReceptionInner
-      agentId={agentId}
-      messages={messages}
-      paymentLinks={paymentLinks}
-      status={status}
-    />
-  );
-}
-
-export function VoiceReception({ agentId }: { agentId: string }) {
+export function VoiceReception({ agentId, slug }: { agentId: string; slug: string }) {
   const [messages, setMessages] = useState<TranscriptMessage[]>([]);
   const [paymentLinks, setPaymentLinks] = useState<PaymentLinkCard[]>([]);
+  const [paymentLinkSent, setPaymentLinkSent] = useState(false);
+  const agentSpeakingRef = useRef(false);
+  const paymentLinkHandlerRef = useRef<((data: PaymentLinkData) => void) | null>(null);
+  const pendingQuickActionRef = useRef<string | null>(null);
+
+  const onModeChange = useCallback((prop: { mode: string }) => {
+    agentSpeakingRef.current = prop.mode === "speaking";
+  }, []);
 
   const onMessage = useCallback(
-    (event: { source: string; message: string; event_id?: number }) => {
-      const role = event.source === "user" ? "user" : "agent";
+    (event: { source?: string; role?: string; message: string; event_id?: number }) => {
+      const role = messageRole(event);
       const text = event.message?.trim();
       if (!text) return;
+
+      if (role === "user" && agentSpeakingRef.current) return;
 
       setMessages((prev) => {
         if (event.event_id != null) {
           const idx = prev.findIndex((m) => m.eventId === event.event_id);
           if (idx >= 0) {
             const next = [...prev];
-            next[idx] = { ...next[idx], text };
+            next[idx] = { ...next[idx], text, role };
             return next;
           }
         }
@@ -167,10 +200,7 @@ export function VoiceReception({ agentId }: { agentId: string }) {
         if (url.includes("/pay?") || url.includes("checkout.stripe.com")) {
           setPaymentLinks((prev) => {
             if (prev.some((p) => p.url === url)) return prev;
-            return [
-              ...prev,
-              { url, label: "Pay your deposit — tap to open" },
-            ];
+            return [...prev, { url, label: "Pay your deposit" }];
           });
         }
       }
@@ -182,31 +212,8 @@ export function VoiceReception({ agentId }: { agentId: string }) {
     (response: { tool_name?: string; full_tool_result?: string }) => {
       if (response.tool_name !== "send_payment_link") return;
       try {
-        const data = JSON.parse(response.full_tool_result ?? "{}") as {
-          payment_page_url?: string;
-          payment_url?: string;
-          deposit_display?: string;
-        };
-        const url = data.payment_page_url ?? data.payment_url;
-        if (!url) return;
-        setPaymentLinks((prev) => {
-          if (prev.some((p) => p.url === url)) return prev;
-          return [
-            ...prev,
-            {
-              url,
-              label: `Pay deposit${data.deposit_display ? ` (${data.deposit_display})` : ""}`,
-            },
-          ];
-        });
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: `system-pay-${Date.now()}`,
-            role: "agent",
-            text: `Payment link ready — open it below or use: ${url}`,
-          },
-        ]);
+        const data = JSON.parse(response.full_tool_result ?? "{}") as PaymentLinkData;
+        paymentLinkHandlerRef.current?.(data);
       } catch {
         // ignore malformed tool output
       }
@@ -215,26 +222,37 @@ export function VoiceReception({ agentId }: { agentId: string }) {
   );
 
   const onDisconnect = useCallback(() => {
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: `end-${Date.now()}`,
-        role: "agent",
-        text: "Call ended. You can start a new call anytime.",
-      },
-    ]);
+    setMessages((prev) => {
+      if (prev.some((m) => m.id.startsWith("end-"))) return prev;
+      return [
+        ...prev,
+        {
+          id: `end-${Date.now()}`,
+          role: "agent",
+          text: "Call ended. Start a new call anytime if you need more help.",
+        },
+      ];
+    });
   }, []);
 
   return (
     <ConversationProvider
       onMessage={onMessage}
+      onModeChange={onModeChange}
       onAgentToolResponse={onAgentToolResponse}
       onDisconnect={onDisconnect}
     >
-      <ConnectedVoiceReception
+      <VoiceReceptionSession
         agentId={agentId}
+        slug={slug}
         messages={messages}
         paymentLinks={paymentLinks}
+        paymentLinkSent={paymentLinkSent}
+        setMessages={setMessages}
+        setPaymentLinks={setPaymentLinks}
+        setPaymentLinkSent={setPaymentLinkSent}
+        paymentLinkHandlerRef={paymentLinkHandlerRef}
+        pendingQuickActionRef={pendingQuickActionRef}
       />
     </ConversationProvider>
   );

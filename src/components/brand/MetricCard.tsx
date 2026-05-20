@@ -15,14 +15,14 @@ export function MetricCard({
   return (
     <div
       className={cn(
-        "rounded-xl border border-slate-200 bg-white p-5 shadow-sm",
+        "rounded-2xl border border-slate-200 bg-white p-5 shadow-sm",
         className
       )}
     >
-      <p className="text-sm text-slate-gray">{label}</p>
-      <p className="mt-2 text-2xl font-bold text-deep-navy">{value}</p>
+      <p className="text-sm font-medium text-slate-500">{label}</p>
+      <p className="mt-2 text-2xl font-bold text-slate-900">{value}</p>
       {change && (
-        <p className="mt-1 flex items-center gap-1 text-sm text-soft-mint">
+        <p className="mt-1 flex items-center gap-1 text-sm font-medium text-teal-600">
           <TrendingUp className="h-4 w-4" />
           {change}
         </p>

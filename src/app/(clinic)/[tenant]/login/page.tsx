@@ -7,6 +7,7 @@ import { Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { clinicPath } from "@/lib/routes";
 import { isPatientAuthConfigured } from "@/lib/supabase/client";
+import { ClinicPageShell, ClinicCard } from "@/components/clinic/ClinicPageShell";
 
 export default function PatientLoginPage() {
   const params = useParams();
@@ -41,58 +42,61 @@ export default function PatientLoginPage() {
   }
 
   return (
-    <div className="mx-auto max-w-md px-6 py-12">
-      <h1 className="text-2xl font-bold text-slate-900">Sign in with email</h1>
-      <p className="mt-2 text-sm text-slate-600">
-        We&apos;ll send a magic link from Supabase so you can view appointments and pay any pending
-        deposits. Built-in email has rate limits (a few links per hour per address).
-      </p>
-
+    <ClinicPageShell
+      slug={slug}
+      title="Sign in with email"
+      description="We'll send a magic link so you can view appointments and pay any pending deposits."
+    >
       {!configured && (
-        <div className="mt-6 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+        <ClinicCard className="mb-4 border-amber-200 bg-amber-50 text-sm text-amber-900">
           Add <code className="rounded bg-amber-100 px-1">NEXT_PUBLIC_SUPABASE_ANON_KEY</code> to{" "}
           <code className="rounded bg-amber-100 px-1">.env.local</code> and enable Email auth in
           your Supabase project.
-        </div>
+        </ClinicCard>
       )}
 
       {sent ? (
-        <div className="mt-8 rounded-xl border border-teal-200 bg-teal-50 p-6 text-sm text-teal-900">
+        <ClinicCard className="border-teal-200 bg-teal-50/80 text-sm text-teal-900">
           <p className="font-semibold">Check your inbox</p>
           <p className="mt-2">
             We sent a sign-in link to <strong>{email}</strong>. Click it to open your appointments.
           </p>
-        </div>
+        </ClinicCard>
       ) : (
-        <form onSubmit={handleSubmit} className="mt-8 space-y-4">
-          <label className="block text-sm font-medium text-slate-700">
-            Email
-            <div className="relative mt-1">
-              <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                disabled={!configured}
-                placeholder="you@example.com"
-                className="w-full rounded-lg border border-slate-200 py-2.5 pl-10 pr-4 text-sm"
-              />
-            </div>
-          </label>
-          {error && <p className="text-sm text-red-600">{error}</p>}
-          <Button type="submit" className="w-full" disabled={loading || !configured}>
-            {loading ? "Sending…" : "Send magic link"}
-          </Button>
-        </form>
+        <ClinicCard>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <label className="block text-sm font-medium text-slate-700">
+              Email
+              <div className="relative mt-1.5">
+                <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  disabled={!configured}
+                  placeholder="you@example.com"
+                  className="w-full rounded-xl border border-slate-200 py-2.5 pl-10 pr-4 text-sm focus:border-teal-400 focus:outline-none focus:ring-2 focus:ring-teal-100"
+                />
+              </div>
+            </label>
+            {error && <p className="text-sm text-red-600">{error}</p>}
+            <Button
+              type="submit"
+              className="w-full bg-teal-600 hover:bg-teal-700"
+              disabled={loading || !configured}
+            >
+              {loading ? "Sending…" : "Send magic link"}
+            </Button>
+          </form>
+        </ClinicCard>
       )}
 
-      <Link
-        href={clinicPath(slug)}
-        className="mt-6 block text-center text-sm text-slate-500 hover:text-teal-700"
-      >
-        ← Back to home
-      </Link>
-    </div>
+      <p className="mt-6 text-center text-sm text-slate-500">
+        <Link href={clinicPath(slug, "appointments")} className="text-teal-700 hover:underline">
+          View appointments by phone
+        </Link>
+      </p>
+    </ClinicPageShell>
   );
 }

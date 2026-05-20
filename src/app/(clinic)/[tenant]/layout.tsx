@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { getTenantBySlug } from "@/lib/tenant";
 import { ClinicHeader } from "@/components/clinic/ClinicHeader";
 import { ClinicFooter } from "@/components/clinic/ClinicFooter";
+import { ClinicCheckoutHost } from "@/components/clinic/ClinicCheckoutHost";
 
 export async function generateMetadata({
   params,
@@ -30,9 +31,11 @@ export default async function ClinicLayout({
   if (!tenant) notFound();
 
   return (
-    <div className="flex min-h-screen flex-col bg-slate-50">
+    <div className="flex min-h-screen flex-col bg-[#f4f6f8]">
       <ClinicHeader tenant={tenant} slug={slug} />
-      <main className="flex-1">{children}</main>
+      <ClinicCheckoutHost tenantSlug={slug}>
+        <main className="flex-1">{children}</main>
+      </ClinicCheckoutHost>
       <ClinicFooter />
     </div>
   );

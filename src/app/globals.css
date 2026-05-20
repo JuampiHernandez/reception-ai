@@ -3,11 +3,13 @@
 :root {
   --deep-navy: #0b1020;
   --reception-blue: #3b82f6;
+  --clinic-teal: #0d9488;
+  --clinic-teal-light: #f0fdfa;
   --soft-mint: #34d399;
   --slate-gray: #64748b;
-  --cloud-white: #f8fafc;
-  --background: #f8fafc;
-  --foreground: #0b1020;
+  --cloud-white: #f4f6f8;
+  --background: #f4f6f8;
+  --foreground: #0f172a;
 }
 
 @theme inline {

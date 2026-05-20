@@ -8,4 +8,5 @@ export type TranscriptMessage = {
 export type PaymentLinkCard = {
   url: string;
   label: string;
+  amountDisplay?: string;
 };

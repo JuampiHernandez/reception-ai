@@ -1,42 +1,47 @@
 import { redirect } from "next/navigation";
 import { getSessionUser } from "@/lib/auth";
 import { clinicPath } from "@/lib/routes";
+import { DashboardPageHeader, DashboardCard } from "@/components/dashboard/DashboardShell";
 
 export default async function SettingsPage() {
   const session = await getSessionUser();
   if (!session?.tenant) redirect("/login");
   const t = session.tenant;
+  const siteUrl = (process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000") + clinicPath(t.slug);
 
   return (
     <div>
-      <h1 className="text-2xl font-bold">Settings</h1>
-      <div className="mt-8 max-w-lg space-y-4 rounded-xl border border-slate-200 bg-white p-6">
-        <div>
-          <label className="text-sm font-medium">Business name</label>
-          <p className="mt-1">{t.name}</p>
-        </div>
-        <div>
-          <label className="text-sm font-medium">Slug / API tenant</label>
-          <p className="mt-1 font-mono text-sm">{t.slug}</p>
-        </div>
-        <div>
-          <label className="text-sm font-medium">Address</label>
-          <p className="mt-1">{t.address}</p>
-        </div>
-        <div>
-          <label className="text-sm font-medium">Phone</label>
-          <p className="mt-1">{t.phone}</p>
-        </div>
-        <div>
-          <label className="text-sm font-medium">Customer site</label>
-          <p className="mt-1 font-mono text-sm">
-            {(process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000") + clinicPath(t.slug)}
-          </p>
-          <pre className="mt-2 overflow-x-auto rounded bg-slate-100 p-3 text-xs">
-            {`<a href="${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}${clinicPath(t.slug)}">Talk to our AI receptionist</a>`}
-          </pre>
-        </div>
-      </div>
+      <DashboardPageHeader
+        title="Settings"
+        description="Your practice profile and patient-facing site."
+      />
+      <DashboardCard className="mt-8 max-w-lg">
+        <dl className="space-y-5 text-sm">
+          <div>
+            <dt className="font-medium text-slate-500">Business name</dt>
+            <dd className="mt-1 text-slate-900">{t.name}</dd>
+          </div>
+          <div>
+            <dt className="font-medium text-slate-500">Slug / API tenant</dt>
+            <dd className="mt-1 font-mono text-slate-900">{t.slug}</dd>
+          </div>
+          <div>
+            <dt className="font-medium text-slate-500">Address</dt>
+            <dd className="mt-1 text-slate-900">{t.address}</dd>
+          </div>
+          <div>
+            <dt className="font-medium text-slate-500">Phone</dt>
+            <dd className="mt-1 text-slate-900">{t.phone}</dd>
+          </div>
+          <div>
+            <dt className="font-medium text-slate-500">Customer site</dt>
+            <dd className="mt-1 break-all font-mono text-teal-700">{siteUrl}</dd>
+            <pre className="mt-2 overflow-x-auto rounded-xl bg-slate-50 p-3 text-xs text-slate-700">
+              {`<a href="${siteUrl}">Talk to our AI receptionist</a>`}
+            </pre>
+          </div>
+        </dl>
+      </DashboardCard>
     </div>
   );
 }

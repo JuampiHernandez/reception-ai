@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getSessionUser } from "@/lib/auth";
 import { getTenantAppointments } from "@/lib/dashboard-data";
+import { DashboardPageHeader, DashboardCard } from "@/components/dashboard/DashboardShell";
 
 export default async function ContactsPage() {
   const session = await getSessionUser();
@@ -11,26 +12,32 @@ export default async function ContactsPage() {
     .map((a) => ({
       name: a.patientName!,
       phone: a.patientPhone,
+      email: a.patientEmail,
       lastVisit: a.slot?.startsAt,
     }));
 
   const unique = Array.from(
-    new Map(contacts.map((c) => [c.name + c.phone, c])).values()
+    new Map(contacts.map((c) => [c.name + (c.phone ?? "") + (c.email ?? ""), c])).values()
   );
 
   return (
     <div>
-      <h1 className="text-2xl font-bold">Contacts</h1>
-      <p className="text-slate-gray">Patients from booked appointments.</p>
+      <DashboardPageHeader
+        title="Contacts"
+        description="Patients from booked appointments."
+      />
       <div className="mt-8 space-y-3">
         {unique.map((c, i) => (
-          <div key={i} className="rounded-xl border border-slate-200 bg-white p-4">
-            <p className="font-medium">{c.name}</p>
-            <p className="text-sm text-slate-gray">{c.phone ?? "—"}</p>
-          </div>
+          <DashboardCard key={i} className="!p-4">
+            <p className="font-semibold text-slate-900">{c.name}</p>
+            <p className="text-sm text-slate-600">{c.phone ?? "—"}</p>
+            {c.email && <p className="text-sm text-slate-500">{c.email}</p>}
+          </DashboardCard>
         ))}
         {unique.length === 0 && (
-          <p className="text-slate-gray">No contacts yet.</p>
+          <DashboardCard>
+            <p className="text-sm text-slate-600">No contacts yet.</p>
+          </DashboardCard>
         )}
       </div>
     </div>

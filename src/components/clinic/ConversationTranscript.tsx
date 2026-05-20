@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { Bot, User, Link2 } from "lucide-react";
+import { Bot, User, AudioLines } from "lucide-react";
 import type { TranscriptMessage } from "./voice-reception-types";
+import { DepositPaymentCard } from "./DepositPaymentCard";
 
-function linkifyText(text: string) {
+function linkifyText(text: string, inAgentBubble: boolean) {
   const urlRegex = /(https?:\/\/[^\s]+)/g;
   const parts = text.split(urlRegex);
   return parts.map((part, i) =>
@@ -14,7 +15,9 @@ function linkifyText(text: string) {
         href={part}
         target="_blank"
         rel="noopener noreferrer"
-        className="break-all font-medium text-teal-700 underline hover:text-teal-900"
+        className={`break-all font-medium underline ${
+          inAgentBubble ? "text-teal-100" : "text-teal-700 hover:text-teal-900"
+        }`}
       >
         {part}
       </a>
@@ -28,10 +31,12 @@ export function ConversationTranscript({
   messages,
   paymentLinks,
   status,
+  composer,
 }: {
   messages: TranscriptMessage[];
-  paymentLinks: Array<{ url: string; label: string }>;
+  paymentLinks: Array<{ url: string; label: string; amountDisplay?: string }>;
   status: string;
+  composer?: React.ReactNode;
 }) {
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -42,11 +47,13 @@ export function ConversationTranscript({
   const isLive = status === "connected" || status === "connecting";
 
   return (
-    <div className="flex min-h-[420px] flex-col rounded-xl border border-slate-100 bg-slate-50/80">
-      <div className="flex items-center justify-between border-b border-slate-100 px-4 py-2">
-        <span className="text-xs font-medium text-slate-500">Live transcript</span>
+    <div className="flex min-h-[320px] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="flex items-center justify-between border-b border-slate-100 px-4 py-2.5">
+        <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+          Live transcript
+        </span>
         {isLive && (
-          <span className="flex items-center gap-1.5 text-xs text-teal-700">
+          <span className="flex items-center gap-1.5 text-xs font-medium text-teal-700">
             <span className="relative flex h-2 w-2">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-teal-400 opacity-75" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-teal-600" />
@@ -56,62 +63,76 @@ export function ConversationTranscript({
         )}
       </div>
 
-      <div className="flex-1 space-y-3 overflow-y-auto p-4">
+      <div className="flex-1 space-y-4 overflow-y-auto p-4">
         {messages.length === 0 && paymentLinks.length === 0 && (
-          <p className="py-12 text-center text-sm text-slate-500">
-            Start a call below. Everything you and the receptionist say will appear here — including
-            payment links you can tap.
+          <p className="py-10 text-center text-sm text-slate-500">
+            Start a call above. Your conversation and payment link will appear here.
           </p>
         )}
 
         {messages.map((msg) => (
           <div
             key={msg.id}
-            className={`flex gap-2 ${msg.role === "user" ? "flex-row-reverse" : ""}`}
+            className={`flex w-full flex-col gap-1 ${
+              msg.role === "user" ? "items-end" : "items-start"
+            }`}
           >
+            <span className="px-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+              {msg.role === "user" ? "You" : "AI Receptionist"}
+            </span>
             <div
-              className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
-                msg.role === "user" ? "bg-slate-200 text-slate-600" : "bg-teal-100 text-teal-700"
+              className={`flex max-w-[88%] gap-2 ${
+                msg.role === "user" ? "flex-row-reverse" : "flex-row"
               }`}
             >
-              {msg.role === "user" ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
-            </div>
-            <div
-              className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
-                msg.role === "user"
-                  ? "bg-white text-slate-800 shadow-sm"
-                  : "bg-teal-600 text-white"
-              }`}
-            >
-              {linkifyText(msg.text)}
-            </div>
-          </div>
-        ))}
-
-        {paymentLinks.map((link, i) => (
-          <div
-            key={`pay-${i}-${link.url}`}
-            className="rounded-xl border border-teal-200 bg-white p-4 shadow-sm"
-          >
-            <div className="flex items-start gap-2">
-              <Link2 className="mt-0.5 h-5 w-5 shrink-0 text-teal-600" />
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-slate-900">{link.label}</p>
-                <a
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-2 block break-all text-sm font-medium text-teal-700 underline hover:text-teal-900"
-                >
-                  {link.url}
-                </a>
+              <div
+                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
+                  msg.role === "user"
+                    ? "bg-slate-100 text-slate-500"
+                    : "bg-teal-600 text-white"
+                }`}
+              >
+                {msg.role === "user" ? (
+                  <User className="h-4 w-4" />
+                ) : (
+                  <Bot className="h-4 w-4" />
+                )}
+              </div>
+              <div
+                className={`rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
+                  msg.role === "user"
+                    ? "rounded-br-sm border border-slate-200 bg-white text-slate-800 shadow-sm"
+                    : "rounded-bl-sm border border-teal-100 bg-teal-50 text-slate-800"
+                }`}
+              >
+                {msg.role === "agent" && isLive ? (
+                  <div className="flex flex-col gap-1">
+                    <AudioLines className="h-3 w-3 text-teal-500 opacity-70" />
+                    <div>{linkifyText(msg.text, true)}</div>
+                  </div>
+                ) : (
+                  linkifyText(msg.text, msg.role === "agent")
+                )}
               </div>
             </div>
           </div>
         ))}
 
+        {paymentLinks.map((link, i) => (
+          <DepositPaymentCard
+            key={`pay-${i}-${link.url}`}
+            url={link.url}
+            amountDisplay={
+              link.amountDisplay ??
+              (link.label.match(/\(\$[^)]+\)/)?.[0]?.slice(1, -1) ?? undefined)
+            }
+          />
+        ))}
+
         <div ref={bottomRef} />
       </div>
+
+      {composer}
     </div>
   );
 }

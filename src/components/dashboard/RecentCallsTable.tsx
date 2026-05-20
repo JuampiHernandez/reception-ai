@@ -13,9 +13,9 @@ export type CallRow = {
 
 export function RecentCallsTable({ calls }: { calls: CallRow[] }) {
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+    <div className="overflow-hidden">
       <table className="w-full text-sm">
-        <thead className="border-b bg-slate-50 text-left text-slate-gray">
+        <thead className="border-b border-slate-100 bg-slate-50/80 text-left text-slate-500">
           <tr>
             <th className="px-4 py-3 font-medium">Caller</th>
             <th className="px-4 py-3 font-medium">Reason</th>
@@ -28,7 +28,7 @@ export function RecentCallsTable({ calls }: { calls: CallRow[] }) {
           {calls.map((c) => (
             <tr key={c.id} className="border-b last:border-0">
               <td className="px-4 py-3 font-medium">{c.callerName ?? "Unknown"}</td>
-              <td className="px-4 py-3 text-slate-gray">{c.reason ?? "—"}</td>
+              <td className="px-4 py-3 text-slate-600">{c.reason ?? "—"}</td>
               <td className="px-4 py-3">{c.booked ? "Yes" : "No"}</td>
               <td className="px-4 py-3">
                 {c.depositCents

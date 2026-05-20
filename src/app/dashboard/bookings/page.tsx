@@ -3,6 +3,7 @@ import { getSessionUser } from "@/lib/auth";
 import { getTenantAppointments } from "@/lib/dashboard-data";
 import { StatusBadge } from "@/components/brand/StatusBadge";
 import { formatDateTime, formatCurrency } from "@/lib/utils";
+import { DashboardPageHeader, DashboardCard } from "@/components/dashboard/DashboardShell";
 
 export default async function BookingsPage() {
   const session = await getSessionUser();
@@ -11,45 +12,48 @@ export default async function BookingsPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold">Bookings</h1>
-      <p className="text-slate-gray">Appointments scheduled by your AI receptionist.</p>
-      <div className="mt-8 space-y-4">
+      <DashboardPageHeader
+        title="Bookings"
+        description="Appointments scheduled by your AI receptionist."
+      />
+      <div className="mt-8 space-y-3">
         {appointments.map((a) => (
-          <div
-            key={a.id}
-            className="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-4"
-          >
-            <div>
-              <p className="font-medium">{a.patientName ?? "Walk-in caller"}</p>
-              <p className="text-sm text-slate-gray">
-                {a.doctor?.name} · {a.service?.name}
-              </p>
-              {a.slot && (
-                <p className="text-sm text-slate-gray">
-                  {formatDateTime(a.slot.startsAt)}
+          <DashboardCard key={a.id} className="!p-4">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="font-semibold text-slate-900">{a.patientName ?? "Walk-in caller"}</p>
+                <p className="text-sm text-slate-600">
+                  {a.doctor?.name} · {a.service?.name}
                 </p>
-              )}
+                {a.slot && (
+                  <p className="text-sm text-slate-500">{formatDateTime(a.slot.startsAt)}</p>
+                )}
+              </div>
+              <div className="text-right">
+                <StatusBadge status={a.status} />
+                {a.amountCents && (
+                  <p className="mt-1 text-sm font-medium text-slate-700">
+                    {formatCurrency(a.amountCents)}
+                  </p>
+                )}
+                {a.paymentUrl && (
+                  <a
+                    href={a.paymentUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-1 block text-xs font-medium text-teal-700 hover:underline"
+                  >
+                    Stripe checkout
+                  </a>
+                )}
+              </div>
             </div>
-            <div className="text-right">
-              <StatusBadge status={a.status} />
-              {a.amountCents && (
-                <p className="mt-1 text-sm">{formatCurrency(a.amountCents)}</p>
-              )}
-              {a.paymentUrl && (
-                <a
-                  href={a.paymentUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-xs text-reception-blue hover:underline"
-                >
-                  Payment link
-                </a>
-              )}
-            </div>
-          </div>
+          </DashboardCard>
         ))}
         {appointments.length === 0 && (
-          <p className="text-slate-gray">No appointments yet. Try the live demo.</p>
+          <DashboardCard>
+            <p className="text-sm text-slate-600">No appointments yet. Try the live demo.</p>
+          </DashboardCard>
         )}
       </div>
     </div>

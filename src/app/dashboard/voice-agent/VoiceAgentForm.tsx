@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { clinicPath } from "@/lib/routes";
+import { DashboardPageHeader, DashboardCard } from "@/components/dashboard/DashboardShell";
 
 type Tenant = {
   id: string;
@@ -23,64 +24,70 @@ export function VoiceAgentForm({
 }) {
   return (
     <div>
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Voice Agent</h1>
-          <p className="text-slate-gray">Configure greeting, voice, and FAQs.</p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="secondary" onClick={() => window.open(clinicPath(tenant.slug), "_blank")}>
-            Test on customer site
-          </Button>
-          <Button>Save changes</Button>
-        </div>
-      </div>
+      <DashboardPageHeader
+        title="Voice Agent"
+        description="Configure greeting, voice, and FAQs."
+        action={
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => window.open(clinicPath(tenant.slug), "_blank")}
+            >
+              Test on customer site
+            </Button>
+            <Button className="bg-teal-600 hover:bg-teal-700">Save changes</Button>
+          </div>
+        }
+      />
 
       <div className="mt-8 grid gap-8 lg:grid-cols-2">
         <div className="space-y-6">
-          <div className="rounded-xl border border-slate-200 bg-white p-6">
-            <label className="text-sm font-medium">Greeting</label>
+          <DashboardCard>
+            <label className="text-sm font-medium text-slate-700">Greeting</label>
             <textarea
-              className="mt-2 w-full rounded-lg border border-slate-200 p-3 text-sm"
+              className="mt-2 w-full rounded-xl border border-slate-200 p-3 text-sm focus:border-teal-400 focus:outline-none focus:ring-2 focus:ring-teal-100"
               rows={4}
               defaultValue={tenant.greeting ?? ""}
             />
-          </div>
-          <div className="rounded-xl border border-slate-200 bg-white p-6">
-            <label className="text-sm font-medium">Voice</label>
-            <select className="mt-2 w-full rounded-lg border border-slate-200 p-3 text-sm" defaultValue={tenant.voiceId ?? "sarah"}>
+          </DashboardCard>
+          <DashboardCard>
+            <label className="text-sm font-medium text-slate-700">Voice</label>
+            <select
+              className="mt-2 w-full rounded-xl border border-slate-200 p-3 text-sm"
+              defaultValue={tenant.voiceId ?? "sarah"}
+            >
               <option value="sarah">Sarah (Friendly)</option>
               <option value="professional">Professional</option>
               <option value="warm">Warm</option>
             </select>
-          </div>
-          <div className="rounded-xl border border-slate-200 bg-white p-6">
-            <h3 className="font-medium">FAQs</h3>
+          </DashboardCard>
+          <DashboardCard>
+            <h3 className="font-medium text-slate-900">FAQs</h3>
             <ul className="mt-4 space-y-3 text-sm">
               {faqs.map((f, i) => (
-                <li key={i} className="border-b pb-3 last:border-0">
-                  <p className="font-medium">{f.question}</p>
-                  <p className="text-slate-gray">{f.answer}</p>
+                <li key={i} className="border-b border-slate-100 pb-3 last:border-0">
+                  <p className="font-medium text-slate-900">{f.question}</p>
+                  <p className="text-slate-600">{f.answer}</p>
                 </li>
               ))}
             </ul>
-          </div>
+          </DashboardCard>
         </div>
-        <div className="rounded-xl border border-slate-200 bg-deep-navy p-6 text-white">
-          <h3 className="font-medium">Preview Agent</h3>
+        <DashboardCard className="border-teal-100 bg-gradient-to-br from-teal-700 to-teal-800 text-white">
+          <h3 className="font-medium">Preview agent</h3>
           <div className="mt-4 space-y-3 text-sm">
-            <p className="rounded-lg bg-white/10 p-3">{tenant.greeting}</p>
-            <p className="rounded-lg bg-reception-blue/30 p-3 text-right">
+            <p className="rounded-xl bg-white/10 p-3">{tenant.greeting}</p>
+            <p className="rounded-xl bg-white/20 p-3 text-right">
               I&apos;d like to book an appointment for tooth pain.
             </p>
-            <p className="rounded-lg bg-white/10 p-3">
+            <p className="rounded-xl bg-white/10 p-3">
               I understand. I recommend Dr. Ana Martínez. Does Thursday at 10:30 work for you?
             </p>
           </div>
-          <p className="mt-4 text-xs text-slate-400">
+          <p className="mt-4 text-xs text-teal-100">
             Agent ID: {tenant.elevenLabsAgentId || "Set NEXT_PUBLIC_ELEVENLABS_AGENT_ID"}
           </p>
-        </div>
+        </DashboardCard>
       </div>
     </div>
   );

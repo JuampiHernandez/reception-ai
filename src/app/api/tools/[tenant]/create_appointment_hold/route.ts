@@ -157,7 +157,7 @@ async function handleCreateAppointmentHold(
     deposit_display: formatCurrency(service.depositCents, service.currency),
     hold_expires_at: holdExpires.toISOString(),
     message:
-      "Appointment held for 10 minutes. Call send_payment_link with appointment_id to send the Stripe deposit link.",
+      "Appointment held for 10 minutes. Immediately call send_payment_link with this appointment_id in the same turn — do not wait for the patient to respond first.",
   });
 }
 

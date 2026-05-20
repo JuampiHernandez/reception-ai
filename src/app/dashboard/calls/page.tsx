@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getSessionUser } from "@/lib/auth";
 import { getTenantCalls } from "@/lib/dashboard-data";
 import { RecentCallsTable } from "@/components/dashboard/RecentCallsTable";
+import { DashboardPageHeader, DashboardCard } from "@/components/dashboard/DashboardShell";
 
 export default async function CallsPage() {
   const session = await getSessionUser();
@@ -10,11 +11,13 @@ export default async function CallsPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold">Calls</h1>
-      <p className="text-slate-gray">All conversations handled by your AI agent.</p>
-      <div className="mt-8">
+      <DashboardPageHeader
+        title="Calls"
+        description="All conversations handled by your AI agent."
+      />
+      <DashboardCard className="mt-8 overflow-hidden !p-0">
         <RecentCallsTable calls={calls} />
-      </div>
+      </DashboardCard>
     </div>
   );
 }

@@ -8,6 +8,7 @@ import { SoundWaveVisualizer } from "@/components/brand/SoundWaveVisualizer";
 import { formatCurrency } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { clinicPath } from "@/lib/routes";
+import { DashboardPageHeader, DashboardCard } from "@/components/dashboard/DashboardShell";
 
 export default async function DashboardPage() {
   const session = await getSessionUser();
@@ -18,18 +19,16 @@ export default async function DashboardPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-deep-navy">Dashboard</h1>
-          <p className="text-slate-gray">
-            Overview of your AI receptionist activity and performance.
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="h-2 w-2 rounded-full bg-soft-mint" />
-          <span className="text-sm font-medium text-soft-mint">AI Agent Online</span>
-        </div>
-      </div>
+      <DashboardPageHeader
+        title="Dashboard"
+        description="Overview of your AI receptionist activity and performance."
+        action={
+          <span className="inline-flex items-center gap-2 rounded-full border border-teal-200 bg-teal-50 px-3 py-1 text-sm font-medium text-teal-800">
+            <span className="h-2 w-2 rounded-full bg-teal-500" />
+            AI Agent Online
+          </span>
+        }
+      />
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <MetricCard label="Calls Answered" value={String(stats.callsAnswered)} change="+28%" />
@@ -40,19 +39,26 @@ export default async function DashboardPage() {
 
       <div className="mt-8 grid gap-8 lg:grid-cols-3">
         <div className="lg:col-span-2">
-          <h2 className="mb-4 font-semibold">Recent Calls</h2>
-          <RecentCallsTable calls={calls} />
+          <DashboardCard className="overflow-hidden !p-0" title="Recent calls">
+            <RecentCallsTable calls={calls} />
+          </DashboardCard>
         </div>
-        <div className="rounded-xl bg-deep-navy p-6 text-white">
-          <p className="text-sm text-slate-400">Live Call Activity</p>
-          <p className="mt-2 font-semibold">AI Agent is listening...</p>
-          <SoundWaveVisualizer className="my-6 justify-center" />
-          <Link href={clinicPath(session.tenant.slug)}>
-            <Button variant="outline" size="sm" className="w-full">
-              View customer site
-            </Button>
-          </Link>
-        </div>
+        <DashboardCard className="border-teal-100 bg-gradient-to-br from-teal-600 to-teal-700 !p-0 text-white">
+          <div className="p-6">
+            <p className="text-sm text-teal-100">Live call activity</p>
+            <p className="mt-2 font-semibold">AI agent is listening…</p>
+            <SoundWaveVisualizer className="my-6 justify-center [&_div]:bg-white/80" />
+            <Link href={clinicPath(session.tenant.slug)}>
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full border-white/30 bg-white/10 text-white hover:bg-white/20"
+              >
+                View customer site
+              </Button>
+            </Link>
+          </div>
+        </DashboardCard>
       </div>
     </div>
   );

@@ -1,6 +1,18 @@
 "use client";
 
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+} from "recharts";
+import { DashboardPageHeader, DashboardCard } from "@/components/dashboard/DashboardShell";
 
 const weeklyData = [
   { day: "Mon", calls: 18, prev: 12 },
@@ -11,37 +23,45 @@ const weeklyData = [
 ];
 
 const reasons = [
-  { name: "New consultation", value: 45, color: "#3B82F6" },
-  { name: "Existing patient", value: 25, color: "#34D399" },
-  { name: "General question", value: 15, color: "#64748B" },
-  { name: "Reschedule", value: 10, color: "#F59E0B" },
-  { name: "Other", value: 5, color: "#94A3B8" },
+  { name: "New consultation", value: 45, color: "#0d9488" },
+  { name: "Existing patient", value: 25, color: "#2dd4bf" },
+  { name: "General question", value: 15, color: "#94a3b8" },
+  { name: "Reschedule", value: 10, color: "#f59e0b" },
+  { name: "Other", value: 5, color: "#cbd5e1" },
 ];
 
 export default function AnalyticsPage() {
   return (
     <div>
-      <h1 className="text-2xl font-bold">Analytics</h1>
-      <p className="text-slate-gray">Performance trends for your AI receptionist.</p>
+      <DashboardPageHeader
+        title="Analytics"
+        description="Performance trends for your AI receptionist."
+      />
       <div className="mt-8 grid gap-8 lg:grid-cols-2">
-        <div className="rounded-xl border border-slate-200 bg-white p-6">
-          <h3 className="font-medium">Weekly calls</h3>
+        <DashboardCard title="Weekly calls">
           <ResponsiveContainer width="100%" height={240}>
             <BarChart data={weeklyData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="day" />
-              <YAxis />
+              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+              <XAxis dataKey="day" tick={{ fill: "#64748b", fontSize: 12 }} />
+              <YAxis tick={{ fill: "#64748b", fontSize: 12 }} />
               <Tooltip />
-              <Bar dataKey="calls" fill="#3B82F6" />
-              <Bar dataKey="prev" fill="#E2E8F0" />
+              <Bar dataKey="calls" fill="#0d9488" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="prev" fill="#e2e8f0" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
-        </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-6">
-          <h3 className="font-medium">Top call reasons</h3>
+        </DashboardCard>
+        <DashboardCard title="Top call reasons">
           <ResponsiveContainer width="100%" height={240}>
             <PieChart>
-              <Pie data={reasons} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>
+              <Pie
+                data={reasons}
+                dataKey="value"
+                nameKey="name"
+                cx="50%"
+                cy="50%"
+                outerRadius={80}
+                label
+              >
                 {reasons.map((e, i) => (
                   <Cell key={i} fill={e.color} />
                 ))}
@@ -49,7 +69,7 @@ export default function AnalyticsPage() {
               <Tooltip />
             </PieChart>
           </ResponsiveContainer>
-        </div>
+        </DashboardCard>
       </div>
     </div>
   );

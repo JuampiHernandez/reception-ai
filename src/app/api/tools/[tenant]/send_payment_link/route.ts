@@ -77,7 +77,7 @@ async function handleSendPaymentLink(request: NextRequest, slug: string) {
     amount_cents: service.depositCents,
     deposit_display: `$${(service.depositCents / 100).toFixed(2)}`,
     currency: service.currency,
-    message: `Tell the patient to open this link to pay the deposit: ${paymentPageUrl}. Do not use markdown link syntax — paste the full URL as plain text.`,
+    message: `Payment link is on the patient's screen in the live transcript (do not read the URL aloud). If they gave an email, they can sign in at ${baseUrl}${clinicPath(slug, "login")} and pay from My appointments. Tap link: ${paymentPageUrl}`,
   });
 }
 

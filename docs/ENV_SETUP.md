@@ -135,7 +135,7 @@ Only needed if you test the landing page “Start free trial” subscription but
 
 ---
 
-## Supabase optional (not used by Drizzle today)
+## Supabase Auth (patient magic-link login)
 
 ### 10. `NEXT_PUBLIC_SUPABASE_URL`
 
@@ -148,6 +148,19 @@ Only needed if you test the landing page “Start free trial” subscription but
 ### 12. `SUPABASE_SERVICE_ROLE_KEY`
 
 **Where:** Same page → **service_role** key (keep secret, never expose in browser)
+
+**Dashboard checklist (Authentication):**
+
+| Setting | What to use |
+|--------|-------------|
+| **Providers → Email** | Enabled |
+| **URL Configuration → Site URL** | Production: `https://reception-ai-delta.vercel.app`. Local-only testing: `http://localhost:3000` |
+| **Redirect URLs** | Must include `{APP_URL}/auth/callback` for prod and localhost |
+| **Emails → Magic link** | Default template is fine; links use `emailRedirectTo` from the app |
+
+Magic-link emails are sent **by Supabase** built-in email (free tier, rate-limited). No custom domain required.
+
+**Payment / checkout:** Supabase only sends auth emails, not custom receipts. Patients pay via the **live transcript** during the call, or after **Sign in** → **My appointments** (same email used when booking).
 
 ---
 

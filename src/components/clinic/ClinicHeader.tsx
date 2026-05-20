@@ -28,6 +28,9 @@ export function ClinicHeader({ tenant, slug }: { tenant: Tenant; slug: string })
           <Link href={clinicPath(slug, "appointments")} className="hover:text-teal-700">
             My appointments
           </Link>
+          <Link href={clinicPath(slug, "login")} className="hover:text-teal-700">
+            Sign in
+          </Link>
         </nav>
       </div>
       {(tenant.phone || tenant.address) && (

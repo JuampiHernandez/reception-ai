@@ -21,6 +21,7 @@ function pickBodyFields(body: Record<string, unknown>) {
     doctor_id: body.doctor_id ?? body.doctorId,
     patient_name: body.patient_name ?? body.patientName,
     patient_phone: body.patient_phone ?? body.patientPhone,
+    patient_email: body.patient_email ?? body.patientEmail,
     reason: body.reason ?? body.symptoms,
   };
 }
@@ -39,6 +40,7 @@ async function handleCreateAppointmentHold(
   const doctorId = fields.doctor_id ? String(fields.doctor_id) : null;
   const patientName = fields.patient_name ? String(fields.patient_name) : undefined;
   const patientPhone = fields.patient_phone ? String(fields.patient_phone) : undefined;
+  const patientEmail = fields.patient_email ? String(fields.patient_email).trim().toLowerCase() : undefined;
   const reason = fields.reason ? String(fields.reason) : undefined;
 
   toolLog("create_appointment_hold.request", {
@@ -128,6 +130,7 @@ async function handleCreateAppointmentHold(
     serviceId: service.id,
     patientName,
     patientPhone,
+    patientEmail,
     reason,
     status: "held",
     amountCents: service.depositCents,

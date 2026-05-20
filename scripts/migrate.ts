@@ -17,13 +17,18 @@ const sql = postgres(connectionString, {
 });
 
 async function migrate() {
-  const migrationPath = path.join(
-    process.cwd(),
-    "supabase/migrations/001_initial.sql"
-  );
-  const migrationSql = fs.readFileSync(migrationPath, "utf-8");
-  await sql.unsafe(migrationSql);
-  console.log("Supabase migration applied successfully");
+  const dir = path.join(process.cwd(), "supabase/migrations");
+  const files = fs
+    .readdirSync(dir)
+    .filter((f) => f.endsWith(".sql"))
+    .sort();
+
+  for (const file of files) {
+    const migrationSql = fs.readFileSync(path.join(dir, file), "utf-8");
+    await sql.unsafe(migrationSql);
+    console.log(`Applied ${file}`);
+  }
+  console.log("All migrations applied successfully");
   await sql.end();
 }
 

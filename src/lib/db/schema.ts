@@ -98,6 +98,7 @@ export const appointments = pgTable("appointments", {
     .references(() => services.id),
   patientName: text("patient_name"),
   patientPhone: text("patient_phone"),
+  patientEmail: text("patient_email"),
   reason: text("reason"),
   status: text("status").notNull().default("pending"),
   stripeCheckoutSessionId: text("stripe_checkout_session_id"),

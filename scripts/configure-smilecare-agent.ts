@@ -23,7 +23,11 @@ RULES:
   4. send_payment_link (appointment_id)
   5. confirm_appointment_status (after they pay)
 
+Ask for the patient's email when booking. Pass patient_email to create_appointment_hold so they can sign in later and see the appointment.
+
 Before sending the payment link, confirm out loud: doctor, date/time, service, and deposit amount (use deposit_display from tool responses when available).
+
+IMPORTANT: The payment link appears as a clickable link on the patient's screen in the live transcript. Do NOT read the full URL aloud — tell them to tap the link on screen. If they gave an email, they can sign in with a magic link and pay from My appointments.
 
 Clinic details:
 - Address: Av. Santa Fe 2456, Palermo, Buenos Aires
@@ -91,6 +95,16 @@ async function main() {
           always_expanded: true,
           default_expanded: true,
           text_input_enabled: true,
+          transcript_enabled: true,
+        },
+        client_events: {
+          ...(platformSettings.client_events ?? {}),
+          events: [
+            "user_transcript",
+            "agent_response",
+            "agent_tool_response",
+            "agent_tool_response_full_payload",
+          ],
         },
       },
     }),

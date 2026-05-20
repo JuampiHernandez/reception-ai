@@ -73,7 +73,15 @@ In ElevenLabs Secrets Manager, add `STRIPE_SECRET_KEY` if using native Stripe to
 
 Set `NEXT_PUBLIC_ELEVENLABS_AGENT_ID` to your agent ID in `.env.local`.
 
-The demo page `/demo/smilecare` loads the ConvAI widget automatically.
+The clinic site `/smilecare` uses `@elevenlabs/react` with a **live transcript** in the main card and call controls below. Payment links from `send_payment_link` appear as clickable cards in the transcript.
+
+Run `npm run agent:configure` to refresh the prompt (tell the agent not to read URLs aloud) and enable client events for transcripts.
+
+## 6b. Patient email login (Supabase only)
+
+- Set `NEXT_PUBLIC_SUPABASE_ANON_KEY` and enable **Email** provider in Supabase Auth.
+- Add redirect URL: `https://YOUR_DOMAIN/auth/callback`
+- Magic links use Supabase built-in email (no custom domain). Payment links show in the live transcript; signed-in patients pay from **My appointments**.
 
 ## 7. Twilio phone (phase 2)
 

@@ -1,7 +1,9 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Calendar, MessageCircle } from "lucide-react";
-import { ElevenLabsWidget } from "@/components/demo/ElevenLabsWidget";
+import { VoiceReception } from "@/components/clinic/VoiceReception";
+import { PatientAuthBanner } from "@/components/clinic/PatientAuthBanner";
+import { getPatientUser } from "@/lib/supabase/server";
 import { getTenantBySlug } from "@/lib/tenant";
 import { clinicPath } from "@/lib/routes";
 import { Button } from "@/components/ui/button";
@@ -22,6 +24,8 @@ export default async function ClinicHomePage({
     tenant.elevenLabsAgentId ||
     process.env.NEXT_PUBLIC_ELEVENLABS_AGENT_ID ||
     "placeholder";
+
+  const patientUser = await getPatientUser();
 
   return (
     <div className="mx-auto max-w-5xl px-6 py-12">
@@ -47,7 +51,17 @@ export default async function ClinicHomePage({
               <MessageCircle className="h-4 w-4 text-teal-600" />
               Talk to our AI receptionist
             </div>
-            <ElevenLabsWidget agentId={agentId} />
+            <PatientAuthBanner slug={slug} email={patientUser?.email ?? null} />
+            <div className="mt-4">
+              {agentId && agentId !== "placeholder" && agentId.startsWith("agent_") ? (
+                <VoiceReception agentId={agentId} />
+              ) : (
+                <p className="rounded-xl border border-amber-200 bg-amber-50 p-6 text-sm text-amber-900">
+                  Set <code className="rounded bg-amber-100 px-1">NEXT_PUBLIC_ELEVENLABS_AGENT_ID</code> in
+                  .env.local to enable voice booking.
+                </p>
+              )}
+            </div>
           </div>
         </div>
 
@@ -71,7 +85,7 @@ export default async function ClinicHomePage({
               <li>Start a voice chat above</li>
               <li>Describe your reason for visiting</li>
               <li>Pick an available time slot</li>
-              <li>Pay your deposit securely via Stripe</li>
+              <li>Pay your deposit — tap the link in the live transcript, or sign in to pay later</li>
             </ol>
           </div>
         </div>

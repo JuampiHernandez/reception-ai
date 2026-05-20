@@ -1,9 +1,12 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { getTenantBySlug } from "@/lib/tenant";
-import { getPatientAppointments } from "@/lib/clinic-data";
+import { getPatientAppointments, getPatientAppointmentsByEmail } from "@/lib/clinic-data";
+import { getPatientUser } from "@/lib/supabase/server";
 import { formatCurrency, formatDateTime } from "@/lib/utils";
 import { StatusBadge } from "@/components/brand/StatusBadge";
 import { Button } from "@/components/ui/button";
+import { clinicPath } from "@/lib/routes";
 
 export default async function AppointmentsPage({
   params,
@@ -17,31 +20,59 @@ export default async function AppointmentsPage({
   const tenant = await getTenantBySlug(slug);
   if (!tenant) notFound();
 
-  const appointments = phone ? await getPatientAppointments(tenant.id, phone) : [];
+  const patientUser = await getPatientUser();
+  const emailAppointments = patientUser?.email
+    ? await getPatientAppointmentsByEmail(tenant.id, patientUser.email)
+    : [];
+  const phoneAppointments = phone ? await getPatientAppointments(tenant.id, phone) : [];
+  const appointments =
+    emailAppointments.length > 0 ? emailAppointments : phoneAppointments;
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-12">
       <h1 className="text-2xl font-bold text-slate-900">My appointments</h1>
-      <p className="mt-2 text-slate-600">
-        Enter the phone number you used when booking to see your appointment history.
-      </p>
 
-      <form method="get" className="mt-8 flex flex-wrap gap-3">
-        <input
-          type="tel"
-          name="phone"
-          defaultValue={phone ?? ""}
-          placeholder="+54 11 5555-1234"
-          className="min-w-[240px] flex-1 rounded-lg border border-slate-200 px-4 py-2 text-sm"
-          required
-        />
-        <Button type="submit">Look up</Button>
-      </form>
+      {patientUser?.email ? (
+        <p className="mt-2 text-slate-600">
+          Showing appointments for <strong>{patientUser.email}</strong>.{" "}
+          <Link href={clinicPath(slug, "login")} className="text-teal-700 hover:underline">
+            Not you?
+          </Link>
+        </p>
+      ) : (
+        <>
+          <p className="mt-2 text-slate-600">
+            Enter the phone number you used when booking, or{" "}
+            <Link href={clinicPath(slug, "login")} className="font-medium text-teal-700 hover:underline">
+              sign in with email
+            </Link>{" "}
+            to see everything in one place.
+          </p>
 
-      {phone && appointments.length === 0 && (
+          <form method="get" className="mt-8 flex flex-wrap gap-3">
+            <input
+              type="tel"
+              name="phone"
+              defaultValue={phone ?? ""}
+              placeholder="+54 11 5555-1234"
+              className="min-w-[240px] flex-1 rounded-lg border border-slate-200 px-4 py-2 text-sm"
+            />
+            <Button type="submit">Look up</Button>
+          </form>
+        </>
+      )}
+
+      {phone && !patientUser && appointments.length === 0 && (
         <p className="mt-8 rounded-lg border border-slate-200 bg-white p-6 text-sm text-slate-600">
           No appointments found for <strong>{phone}</strong>. Book one using our AI receptionist on
           the home page.
+        </p>
+      )}
+
+      {patientUser && appointments.length === 0 && (
+        <p className="mt-8 rounded-lg border border-slate-200 bg-white p-6 text-sm text-slate-600">
+          No appointments yet for this email. Book with our AI receptionist and share your email
+          during the call.
         </p>
       )}
 
@@ -60,9 +91,7 @@ export default async function AppointmentsPage({
                   <p className="mt-1 text-sm text-slate-600">
                     {a.doctor?.name} · {a.slot ? formatDateTime(a.slot.startsAt) : "TBD"}
                   </p>
-                  {a.reason && (
-                    <p className="mt-2 text-sm text-slate-500">{a.reason}</p>
-                  )}
+                  {a.reason && <p className="mt-2 text-sm text-slate-500">{a.reason}</p>}
                 </div>
                 <StatusBadge status={a.status} />
               </div>
@@ -70,6 +99,14 @@ export default async function AppointmentsPage({
                 <p className="mt-3 text-xs text-slate-500">
                   Deposit: {formatCurrency(a.amountCents)}
                 </p>
+              )}
+              {a.status === "pending_payment" && (
+                <Link
+                  href={clinicPath(slug, "pay") + `?appointment_id=${a.id}`}
+                  className="mt-4 inline-flex rounded-lg bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-700"
+                >
+                  Pay deposit now
+                </Link>
               )}
             </li>
           ))}

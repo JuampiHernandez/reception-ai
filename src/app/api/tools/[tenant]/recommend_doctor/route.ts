@@ -36,16 +36,21 @@ export async function POST(
 
   return toolJson({
     ...recommendation,
+    doctor_id: recommendation.doctorId,
+    service_id: recommendation.suggestedServiceId,
     business_name: tenant.name,
     address: tenant.address,
     suggested_service: service
       ? {
           id: service.id,
+          service_id: service.id,
           name: service.name,
           deposit_cents: service.depositCents,
           price_cents: service.priceCents,
           currency: service.currency,
         }
       : null,
+    booking_hint:
+      "Save doctor_id and service_id for create_appointment_hold. Use exact slot_id from get_availability, not the display time.",
   });
 }

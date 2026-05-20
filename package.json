@@ -10,7 +10,8 @@
     "db:migrate": "tsx scripts/migrate.ts",
     "db:seed": "tsx scripts/seed-smilecare.ts",
     "db:setup": "npm run db:migrate && npm run db:seed",
-    "agent:configure": "tsx scripts/configure-smilecare-agent.ts"
+    "agent:configure": "tsx scripts/configure-smilecare-agent.ts",
+    "test:smilecare-api": "bash scripts/test-smilecare-api.sh"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

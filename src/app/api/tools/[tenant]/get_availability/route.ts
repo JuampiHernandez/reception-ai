@@ -40,6 +40,7 @@ export async function GET(
       slot_id: s.id,
       starts_at: s.startsAt.toISOString(),
       display: formatDateTime(s.startsAt),
+      booking_hint: `Use slot_id "${s.id}" when calling create_appointment_hold`,
     })),
   });
 }

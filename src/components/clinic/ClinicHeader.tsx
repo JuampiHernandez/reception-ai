@@ -1,8 +1,6 @@
 import Link from "next/link";
 import { Phone, MapPin } from "lucide-react";
 import { clinicPath } from "@/lib/routes";
-import { Button } from "@/components/ui/button";
-
 type Tenant = {
   name: string;
   phone: string | null;
@@ -39,11 +37,6 @@ export function ClinicHeader({ tenant, slug }: { tenant: Tenant; slug: string })
           </Link>
           <Link href={clinicPath(slug, "appointments")} className="hover:text-teal-700">
             My appointments
-          </Link>
-          <Link href={clinicPath(slug, "login")}>
-            <Button size="sm" className="bg-teal-600 hover:bg-teal-700">
-              Sign in
-            </Button>
           </Link>
         </nav>
       </div>

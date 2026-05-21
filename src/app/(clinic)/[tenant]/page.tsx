@@ -1,8 +1,7 @@
 import { notFound } from "next/navigation";
 import { VoiceReception } from "@/components/clinic/VoiceReception";
-import { PatientAuthBanner } from "@/components/clinic/PatientAuthBanner";
-import { getPatientUser } from "@/lib/supabase/server";
 import { getTenantBySlug } from "@/lib/tenant";
+import { getDefaultDialCode } from "@/lib/phone";
 
 export default async function ClinicHomePage({
   params,
@@ -20,8 +19,6 @@ export default async function ClinicHomePage({
     tenant.elevenLabsAgentId ||
     process.env.NEXT_PUBLIC_ELEVENLABS_AGENT_ID ||
     "placeholder";
-
-  const patientUser = await getPatientUser();
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-10">
@@ -44,13 +41,14 @@ export default async function ClinicHomePage({
           {tenant.greeting ??
             "Talk to our AI receptionist to book an appointment, ask about services, or check availability."}
         </p>
-        <div className="mt-4">
-          <PatientAuthBanner slug={slug} email={patientUser?.email ?? null} />
-        </div>
       </div>
 
       {agentId && agentId !== "placeholder" && agentId.startsWith("agent_") ? (
-        <VoiceReception agentId={agentId} slug={slug} />
+        <VoiceReception
+          agentId={agentId}
+          slug={slug}
+          defaultDialCode={getDefaultDialCode(tenant.timezone)}
+        />
       ) : (
         <p className="rounded-xl border border-amber-200 bg-amber-50 p-6 text-sm text-amber-900">
           Set <code className="rounded bg-amber-100 px-1">NEXT_PUBLIC_ELEVENLABS_AGENT_ID</code> in

@@ -40,6 +40,7 @@ function messageRole(event: { source?: string; role?: string }): "user" | "agent
 function VoiceReceptionSession({
   agentId,
   slug,
+  defaultDialCode,
   messages,
   paymentLinks,
   paymentLinkSent,
@@ -51,6 +52,7 @@ function VoiceReceptionSession({
 }: {
   agentId: string;
   slug: string;
+  defaultDialCode: string;
   messages: TranscriptMessage[];
   paymentLinks: PaymentLinkCard[];
   paymentLinkSent: boolean;
@@ -151,12 +153,24 @@ function VoiceReceptionSession({
           }
         />
       </div>
-      <ClinicSidebar slug={slug} onQuickAction={handleQuickAction} />
+      <ClinicSidebar
+        slug={slug}
+        defaultDialCode={defaultDialCode}
+        onQuickAction={handleQuickAction}
+      />
     </div>
   );
 }
 
-export function VoiceReception({ agentId, slug }: { agentId: string; slug: string }) {
+export function VoiceReception({
+  agentId,
+  slug,
+  defaultDialCode = "54",
+}: {
+  agentId: string;
+  slug: string;
+  defaultDialCode?: string;
+}) {
   const [messages, setMessages] = useState<TranscriptMessage[]>([]);
   const [paymentLinks, setPaymentLinks] = useState<PaymentLinkCard[]>([]);
   const [paymentLinkSent, setPaymentLinkSent] = useState(false);
@@ -245,6 +259,7 @@ export function VoiceReception({ agentId, slug }: { agentId: string; slug: strin
       <VoiceReceptionSession
         agentId={agentId}
         slug={slug}
+        defaultDialCode={defaultDialCode}
         messages={messages}
         paymentLinks={paymentLinks}
         paymentLinkSent={paymentLinkSent}

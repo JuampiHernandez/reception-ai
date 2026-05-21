@@ -25,6 +25,7 @@ export async function createAppointmentCheckout(params: {
   amountCents: number;
   currency: string;
   patientName?: string;
+  patientEmail?: string;
   successUrl: string;
   cancelUrl: string;
 }) {
@@ -33,6 +34,8 @@ export async function createAppointmentCheckout(params: {
     const mockUrl = `${params.successUrl}?mock_payment=1&appointment_id=${params.appointmentId}`;
     return { url: mockUrl, sessionId: `mock_${params.appointmentId}` };
   }
+
+  const customerEmail = params.patientEmail?.trim().toLowerCase();
 
   const session = await stripe.checkout.sessions.create({
     mode: "payment",
@@ -57,29 +60,53 @@ export async function createAppointmentCheckout(params: {
     },
     success_url: params.successUrl,
     cancel_url: params.cancelUrl,
-    customer_email: undefined,
+    ...(customerEmail
+      ? {
+          customer_email: customerEmail,
+          payment_intent_data: { receipt_email: customerEmail },
+        }
+      : {}),
   });
 
   return { url: session.url!, sessionId: session.id };
 }
 
 export async function createSubscriptionCheckout(params: {
-  tenantId: string;
+  tenantId?: string;
+  plan: string;
   priceId: string;
   successUrl: string;
   cancelUrl: string;
-  customerEmail?: string;
+  customerEmail: string;
+  businessName?: string;
 }) {
   const stripe = getStripe();
   if (!stripe) {
-    return { url: params.successUrl + "?mock_subscription=1", sessionId: "mock_sub" };
+    const mockUrl = new URL(params.successUrl);
+    mockUrl.searchParams.set("mock_subscription", "1");
+    mockUrl.searchParams.set("email", params.customerEmail);
+    if (params.businessName) {
+      mockUrl.searchParams.set("business_name", params.businessName);
+    }
+    return { url: mockUrl.toString(), sessionId: "mock_sub" };
   }
 
   const session = await stripe.checkout.sessions.create({
     mode: "subscription",
-    payment_method_types: ["card"],
     line_items: [{ price: params.priceId, quantity: 1 }],
-    metadata: { tenant_id: params.tenantId, type: "platform_subscription" },
+    metadata: {
+      ...(params.tenantId ? { tenant_id: params.tenantId } : {}),
+      type: "platform_subscription",
+      plan: params.plan,
+      customer_email: params.customerEmail,
+      ...(params.businessName ? { business_name: params.businessName } : {}),
+    },
+    subscription_data: {
+      metadata: {
+        plan: params.plan,
+        ...(params.businessName ? { business_name: params.businessName } : {}),
+      },
+    },
     success_url: params.successUrl,
     cancel_url: params.cancelUrl,
     customer_email: params.customerEmail,

@@ -1,7 +1,5 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
 import {
   Calendar,
   Sparkles,
@@ -10,8 +8,7 @@ import {
   HelpCircle,
   Lock,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { clinicPath } from "@/lib/routes";
+import { PhoneLookupForm } from "@/components/clinic/PhoneLookupForm";
 
 const QUICK_ACTIONS = [
   { icon: Sparkles, label: "Book cleaning", message: "I'd like to book a dental cleaning." },
@@ -34,38 +31,23 @@ const QUICK_ACTIONS = [
 
 export function ClinicSidebar({
   slug,
+  defaultDialCode = "54",
   onQuickAction,
 }: {
   slug: string;
+  defaultDialCode?: string;
   onQuickAction?: (message: string) => void;
 }) {
-  const router = useRouter();
-  const [phone, setPhone] = useState("");
-
-  function handleFindAppointment(e: React.FormEvent) {
-    e.preventDefault();
-    const trimmed = phone.trim();
-    if (!trimmed) return;
-    router.push(`${clinicPath(slug, "appointments")}?phone=${encodeURIComponent(trimmed)}`);
-  }
-
   return (
     <div className="space-y-4">
       <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
         <h2 className="font-semibold text-slate-900">Already booked?</h2>
         <p className="mt-1 text-sm text-slate-600">Look up your appointments by phone number.</p>
-        <form onSubmit={handleFindAppointment} className="mt-4 space-y-3">
-          <input
-            type="tel"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            placeholder="+54 11 5555-1234"
-            className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-teal-400 focus:outline-none focus:ring-2 focus:ring-teal-100"
-          />
-          <Button type="submit" className="w-full bg-teal-600 hover:bg-teal-700">
-            Find appointment
-          </Button>
-        </form>
+        <PhoneLookupForm
+          slug={slug}
+          defaultDialCode={defaultDialCode}
+          className="mt-4"
+        />
       </div>
 
       <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">

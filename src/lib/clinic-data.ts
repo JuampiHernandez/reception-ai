@@ -1,26 +1,6 @@
 import { db, schema } from "@/lib/db";
 import { eq, desc } from "drizzle-orm";
-
-function normalizePhone(phone: string) {
-  return phone.replace(/\D/g, "");
-}
-
-export async function getPatientAppointmentsByEmail(tenantId: string, email: string) {
-  const normalized = email.trim().toLowerCase();
-  if (!normalized.includes("@")) return [];
-
-  const appointments = await db.query.appointments.findMany({
-    where: eq(schema.appointments.tenantId, tenantId),
-    orderBy: [desc(schema.appointments.createdAt)],
-    limit: 50,
-  });
-
-  const matched = appointments.filter(
-    (a) => a.patientEmail && a.patientEmail.toLowerCase() === normalized
-  );
-
-  return enrichAppointments(matched);
-}
+import { normalizePhone, phonesMatch } from "@/lib/phone";
 
 async function enrichAppointments(
   matched: (typeof schema.appointments.$inferSelect)[]
@@ -52,7 +32,7 @@ export async function getPatientAppointments(tenantId: string, phone: string) {
   });
 
   const matched = appointments.filter(
-    (a) => a.patientPhone && normalizePhone(a.patientPhone) === normalized
+    (a) => a.patientPhone && phonesMatch(normalized, a.patientPhone)
   );
 
   return enrichAppointments(matched);

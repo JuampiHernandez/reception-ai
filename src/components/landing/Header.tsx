@@ -32,11 +32,6 @@ export function LandingHeader() {
         </nav>
 
         <div className="flex items-center gap-3">
-          <Link href="/login">
-            <Button variant="outline" size="sm">
-              Log in
-            </Button>
-          </Link>
           <a href="#pricing">
             <Button variant="gradient" size="sm">
               Get started →

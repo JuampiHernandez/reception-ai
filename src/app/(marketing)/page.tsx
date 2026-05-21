@@ -407,7 +407,7 @@ export default function HomePage() {
                 more done with AI on your team.
               </p>
               <div className="mt-6 flex flex-wrap gap-4">
-                <Link href="/login">
+                <Link href="/pricing/pro">
                   <Button variant="gradient" size="lg">
                     Start your free trial →
                   </Button>

@@ -50,6 +50,7 @@ async function handleSendPaymentLink(request: NextRequest, slug: string) {
     amountCents: service.depositCents,
     currency: service.currency ?? "usd",
     patientName: appointment.patientName ?? undefined,
+    patientEmail: appointment.patientEmail ?? undefined,
     successUrl: `${baseUrl}${clinicPath(slug, "success")}?appointment_id=${appointmentId}`,
     cancelUrl: `${baseUrl}${clinicPath(slug)}?cancelled=1`,
   });
@@ -101,7 +102,7 @@ async function handleSendPaymentLink(request: NextRequest, slug: string) {
     email_sent: emailSent,
     message: emailSent
       ? `Payment link sent by email to ${appointment.patientEmail}. A pay button also appears on the patient's screen. Tell them briefly the link is in their inbox — do NOT read any URL aloud. End the conversation; do not wait for them to speak again.`
-      : `Payment link is on the patient's screen (pay button in transcript). Do NOT read any URL aloud. If they shared an email, mention they can also sign in at ${baseUrl}${clinicPath(slug, "login")}. End the conversation; do not wait for them to speak again.`,
+      : `Payment link is on the patient's screen (pay button in transcript). Do NOT read any URL aloud. If they need to find appointments later, they can look them up by phone at ${baseUrl}${clinicPath(slug, "appointments")}. End the conversation; do not wait for them to speak again.`,
   });
 }
 

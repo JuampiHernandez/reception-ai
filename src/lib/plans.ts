@@ -73,3 +73,9 @@ export function getPlanPriceId(plan: PlanSlug): string | undefined {
   if (plan === "business") return process.env.STRIPE_PRICE_BUSINESS;
   return process.env.STRIPE_PRICE_PRO;
 }
+
+export function isValidStripePriceId(priceId?: string): priceId is string {
+  if (!priceId) return false;
+  if (priceId.includes("...") || priceId.includes("placeholder")) return false;
+  return priceId.startsWith("price_");
+}

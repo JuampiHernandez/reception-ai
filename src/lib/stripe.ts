@@ -1,4 +1,5 @@
 import Stripe from "stripe";
+import { PLANS, isValidStripePriceId, type PlanSlug } from "@/lib/plans";
 
 let stripeClient: Stripe | null = null;
 
@@ -73,8 +74,8 @@ export async function createAppointmentCheckout(params: {
 
 export async function createSubscriptionCheckout(params: {
   tenantId?: string;
-  plan: string;
-  priceId: string;
+  plan: PlanSlug;
+  priceId?: string;
   successUrl: string;
   cancelUrl: string;
   customerEmail: string;
@@ -91,16 +92,37 @@ export async function createSubscriptionCheckout(params: {
     return { url: mockUrl.toString(), sessionId: "mock_sub" };
   }
 
+  const planInfo = PLANS[params.plan];
+  const metadata = {
+    ...(params.tenantId ? { tenant_id: params.tenantId } : {}),
+    type: "platform_subscription",
+    plan: params.plan,
+    customer_email: params.customerEmail,
+    ...(params.businessName ? { business_name: params.businessName } : {}),
+  };
+
+  const lineItems =
+    isValidStripePriceId(params.priceId)
+      ? [{ price: params.priceId, quantity: 1 }]
+      : [
+          {
+            price_data: {
+              currency: "usd",
+              unit_amount: planInfo.priceMonthly * 100,
+              recurring: { interval: "month" as const },
+              product_data: {
+                name: `Reception.ai ${planInfo.name}`,
+                description: planInfo.description,
+              },
+            },
+            quantity: 1,
+          },
+        ];
+
   const session = await stripe.checkout.sessions.create({
     mode: "subscription",
-    line_items: [{ price: params.priceId, quantity: 1 }],
-    metadata: {
-      ...(params.tenantId ? { tenant_id: params.tenantId } : {}),
-      type: "platform_subscription",
-      plan: params.plan,
-      customer_email: params.customerEmail,
-      ...(params.businessName ? { business_name: params.businessName } : {}),
-    },
+    line_items: lineItems,
+    metadata,
     subscription_data: {
       metadata: {
         plan: params.plan,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { X, Shield, ArrowRight, Loader2, Lock } from "lucide-react";
 type PaymentDetails = {
   appointment_id: string;
@@ -31,6 +31,7 @@ export function CheckoutModal({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [paying, setPaying] = useState(false);
+  const stripeOpenedRef = useRef(false);
 
   const loadDetails = useCallback(async () => {
     setLoading(true);
@@ -55,10 +56,16 @@ export function CheckoutModal({
   }, [tenantSlug, appointmentId]);
 
   useEffect(() => {
-    if (open && appointmentId) void loadDetails();
+    if (open && appointmentId) {
+      stripeOpenedRef.current = false;
+      void loadDetails();
+    }
   }, [open, appointmentId, loadDetails]);
 
   function openCheckoutPopup(url: string) {
+    if (stripeOpenedRef.current) return;
+    stripeOpenedRef.current = true;
+
     const w = 520;
     const h = 720;
     const left = window.screenX + (window.outerWidth - w) / 2;
@@ -66,11 +73,15 @@ export function CheckoutModal({
     const popup = window.open(
       url,
       "smilecare_checkout",
-      `popup=yes,width=${w},height=${h},left=${left},top=${top},noopener,noreferrer`
+      `popup=yes,width=${w},height=${h},left=${left},top=${top}`
     );
-    if (!popup) {
-      window.location.href = url;
+    if (popup) {
+      popup.opener = null;
+      return;
     }
+
+    stripeOpenedRef.current = false;
+    window.location.href = url;
   }
 
   function handlePay() {
